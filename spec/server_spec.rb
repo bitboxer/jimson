@@ -40,7 +40,7 @@ module Jimson
           it "returns a response with 'result'" do
             req = {
                     'jsonrpc' => '2.0',
-                    'method'  => 'n_subtract',
+                    'method'  => 'subtract',
                     'params'  => {'subtrahend'=> 24, 'minuend' => 20},
                     'id'      => 1
                   }

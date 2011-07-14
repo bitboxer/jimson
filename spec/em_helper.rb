@@ -5,13 +5,12 @@ $:.unshift(File.dirname(__FILE__) + '/../lib/')
 require 'jimson'
 
 class TestHandler
-  def n_subtract(args)
-    a, b = args['subtrahend'], args['minuend']
-    subtract(a,b)
-  end
-
-  def subtract(a, b)
-    a - b
+  def subtract(a, b = nil)
+    if a.is_a?(Hash)
+      return a['subtrahend'] - a['minuend']
+    else 
+      return a - b
+    end
   end
 
   def sum(a,b,c)
