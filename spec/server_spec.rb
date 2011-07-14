@@ -80,7 +80,7 @@ module Jimson
                             'jsonrpc' => '2.0',
                             'error'   => {
                                             'code' => -32601,
-                                            'message' => 'The method does not exist.'
+                                            'message' => 'Method not found.'
                                           },
                             'id'      => 1
                           }
@@ -136,7 +136,28 @@ module Jimson
         end
       end
 
-      describe "receiving a batch request" do
+      describe "receiving a valid batch request" do
+        context "when not all requests are notifications" do
+          it "returns an array of responses" do
+            reqs = [
+                      {'jsonrpc' => '2.0', 'method' => 'sum', 'params' => [1,2,4], 'id' => '1'},
+                      {'jsonrpc' => '2.0', 'method' => 'notify_hello', 'params' => [7]},
+                      {'jsonrpc' => '2.0', 'method' => 'subtract', 'params' => [42,23], 'id' => '2'},
+                      {'foo' => 'boo'},
+                      {'jsonrpc' => '2.0', 'method' => 'foo.get', 'params' => {'name' => 'myself'}, 'id' => '5'},
+                      {'jsonrpc' => '2.0', 'method' => 'get_data', 'id' => '9'} 
+                   ].to_json
+            resp = JSON.parse(@sess.post('/', reqs).body)
+            resp.should == [
+                    {'jsonrpc' => '2.0', 'result' => 7, 'id' => '1'},
+                    {'jsonrpc' => '2.0', 'result' => 19, 'id' => '2'},
+                    {'jsonrpc' => '2.0', 'error' => {'code' => -32600, 'message' => 'The JSON sent is not a valid Request object.'}, 'id' => nil},
+                    {'jsonrpc' => '2.0', 'error' => {'code' => -32601, 'message' => 'Method not found.'}, 'id' => '5'},
+                    {'jsonrpc' => '2.0', 'result' => ['hello', 5], 'id' => '9'}
+            ]
+          end
+        end
+
         context "when all the requests are notifications" do
           it "returns no response" do
             req = [

@@ -31,7 +31,7 @@ module Jimson
 
     class MethodNotFound < Generic
       def initialize
-        super(-32601, 'The method does not exist.')
+        super(-32601, 'Method not found.')
       end
     end
 

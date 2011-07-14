@@ -14,8 +14,20 @@ class TestHandler
     a - b
   end
 
+  def sum(a,b,c)
+    a + b + c
+  end
+
+  def notify_hello(a)
+    # notification, doesn't do anything
+  end
+
   def update(a,b,c,d,e)
     # notification, doesn't do anything
+  end
+
+  def get_data
+    ['hello', 5]
   end
 end
 
