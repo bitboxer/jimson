@@ -22,7 +22,17 @@ module Jimson
 
     def create_response(request)
       params = request['params']
-      result = @@handler.send(request['method'], *params)
+      if params.is_a?(Hash)
+        result = @@handler.send(request['method'], params)
+      else
+        result = @@handler.send(request['method'], *params)
+      end
+
+      # A Notification is a Request object without an "id" member.
+      # The Server MUST NOT reply to a Notification, including those 
+      # that are within a batch request.
+      return nil if !request.has_key?('id')
+
       resp = {
                'jsonrpc' => JSON_RPC_VERSION,
                'result'  => result,  
