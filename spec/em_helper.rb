@@ -13,6 +13,10 @@ class TestHandler
   def subtract(a, b)
     a - b
   end
+
+  def update(a,b,c,d,e)
+    # notification, doesn't do anything
+  end
 end
 
 server = Jimson::Server.new(TestHandler.new)

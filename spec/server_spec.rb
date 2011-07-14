@@ -51,8 +51,8 @@ module Jimson
           it "returns no response" do
             req = {
                     'jsonrpc' => '2.0',
-                    'method'  => 'subtract',
-                    'params'  => [24,20]
+                    'method'  => 'update',
+                    'params'  => [1,2,3,4,5]
                   }
             resp = @sess.post('/', req.to_json).body
             resp.should be_empty
