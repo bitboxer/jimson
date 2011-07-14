@@ -17,14 +17,42 @@ module Jimson
 
       begin
         request = parse_request(@http_post_content)
+        if !validate_request(request)
+          raise Jimson::Error::InvalidRequest.new
+        end
         resp.content = create_response(request)
       rescue Jimson::Error::ParseError => e
         resp.content = error_response(e)
       rescue Jimson::Error::MethodNotFound => e
         resp.content = error_response(e, request)
+      rescue Jimson::Error::InvalidRequest => e
+        resp.content = error_response(e, request)
       end
 
       resp.send_response
+    end
+
+    def validate_request(request)
+      valid = true 
+      required_keys = %w(jsonrpc method)
+      required_types = {
+                         'jsonrpc' => [String],
+                         'method'  => [String], 
+                         'params'  => [Hash, Array],
+                         'id'      => [String, Fixnum, NilClass]
+                       }
+      
+      required_keys.each do |key|
+        valid = false if !request.has_key?(key)
+      end
+
+      required_types.each do |key, types|
+        valid = false if request.has_key?(key) && !types.any? { |type| request[key].is_a?(type) }
+      end
+
+      valid = false if request['jsonrpc'] != '2.0'
+      
+      valid
     end
 
     def create_response(request)
@@ -54,7 +82,12 @@ module Jimson
                'jsonrpc' => JSON_RPC_VERSION,
                'error'   => error.to_h,
              }
-      resp['id'] = request['id'] if !!request && request.has_key?('id')
+      if !!request && request.has_key?('id')
+        resp['id'] = request['id'] 
+      else
+        resp['id'] = nil
+      end
+
       resp.to_json
     end
 
