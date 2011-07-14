@@ -41,7 +41,7 @@ module Jimson
             req = {
                     'jsonrpc' => '2.0',
                     'method'  => 'subtract',
-                    'params'  => {'subtrahend'=> 24, 'minuend' => 20},
+                    'params'  => {'subtrahend'=> 20, 'minuend' => 24},
                     'id'      => 1
                   }
             resp = JSON.parse(@sess.post('/', req.to_json).body)
@@ -81,6 +81,26 @@ module Jimson
                             'error'   => {
                                             'code' => -32601,
                                             'message' => 'Method not found.'
+                                          },
+                            'id'      => 1
+                          }
+        end
+      end
+
+      describe "receiving a call with the wrong number of params" do
+        it "returns an error response" do
+          req = {
+                  'jsonrpc' => '2.0',
+                  'method'  => 'subtract',
+                  'params'  => [1,2,3],
+                  'id'      => 1
+                }
+          resp = JSON.parse(@sess.post('/', req.to_json).body)
+          resp.should == {
+                            'jsonrpc' => '2.0',
+                            'error'   => {
+                                            'code' => -32602,
+                                            'message' => 'Invalid method parameter(s).'
                                           },
                             'id'      => 1
                           }

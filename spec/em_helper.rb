@@ -7,7 +7,7 @@ require 'jimson'
 class TestHandler
   def subtract(a, b = nil)
     if a.is_a?(Hash)
-      return a['subtrahend'] - a['minuend']
+      return a['minuend'] - a['subtrahend']
     else 
       return a - b
     end
@@ -17,11 +17,11 @@ class TestHandler
     a + b + c
   end
 
-  def notify_hello(a)
+  def notify_hello(*args)
     # notification, doesn't do anything
   end
 
-  def update(a,b,c,d,e)
+  def update(*args)
     # notification, doesn't do anything
   end
 

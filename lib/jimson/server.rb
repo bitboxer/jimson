@@ -31,6 +31,8 @@ module Jimson
         response = error_response(e)
       rescue Jimson::Error::Generic => e
         response = error_response(e, request)
+      rescue StandardError, Exception
+        response = error_response(Jimson::Error::InternalError.new)
       end
 
       response.compact! if response.is_a?(Array)
@@ -89,6 +91,8 @@ module Jimson
         end
       rescue NoMethodError
         raise Jimson::Error::MethodNotFound.new 
+      rescue ArgumentError
+        raise Jimson::Error::InvalidParams.new
       end
 
       response = success_response(request, result)
