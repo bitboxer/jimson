@@ -3,6 +3,14 @@ require 'spec_helper'
 module Jimson
     describe Server do
 
+      INVALID_RESPONSE_EXPECTATION = {
+                                        'jsonrpc' => '2.0',
+                                        'error'   => {
+                                                        'code' => -32600,
+                                                        'message' => 'The JSON sent is not a valid Request object.'
+                                                      },
+                                        'id'      => nil
+                                      }
       before(:each) do
         @sess = Patron::Session.new
         @sess.base_url = SPEC_URL
@@ -100,21 +108,31 @@ module Jimson
       end
 
       describe "receiving an invalid request" do
-        it "returns an error response" do
-          req = {
-                  'jsonrpc' => '2.0',
-                  'method'  => 1 # method as int is invalid
-                }.to_json
-          resp = JSON.parse(@sess.post('/', req).body)
-          resp.should == {
-                            'jsonrpc' => '2.0',
-                            'error'   => {
-                                            'code' => -32600,
-                                            'message' => 'The JSON sent is not a valid Request object.'
-                                          },
-                            'id'      => nil
+        context "when the request is not a batch" do
+          it "returns an error response" do
+            req = {
+                    'jsonrpc' => '2.0',
+                    'method'  => 1 # method as int is invalid
+                  }.to_json
+            resp = JSON.parse(@sess.post('/', req).body)
+            resp.should == INVALID_RESPONSE_EXPECTATION 
+          end
+        end
 
-                          }
+        context "when the request is an empty batch" do
+          it "returns an error response" do
+            req = [].to_json
+            resp = JSON.parse(@sess.post('/', req).body)
+            resp.should == INVALID_RESPONSE_EXPECTATION
+          end
+        end
+
+        context "when the request is an invalid batch" do
+          it "returns an error response" do
+            req = [1,2].to_json
+            resp = JSON.parse(@sess.post('/', req).body)
+            resp.should == [INVALID_RESPONSE_EXPECTATION, INVALID_RESPONSE_EXPECTATION] 
+          end
         end
       end
 

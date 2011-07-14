@@ -22,12 +22,15 @@ module Jimson
       begin
         request = parse_request(@http_post_content)
         if request.is_a?(Array)
+          raise Jimson::Error::InvalidRequest.new if request.empty?
           response = request.map { |req| handle_request(req) }
         else
           response = handle_request(request)
         end
-      rescue Jimson::Error::ParseError => e
+      rescue Jimson::Error::ParseError, Jimson::Error::InvalidRequest => e
         response = error_response(e)
+      rescue Jimson::Error::Generic => e
+        response = error_response(e, request)
       end
 
       return nil if response.nil?
@@ -38,8 +41,11 @@ module Jimson
     def handle_request(request)
       response = nil
       begin
-        raise Jimson::Error::InvalidRequest.new if !validate_request(request)
-        response = create_response(request)
+        if !validate_request(request)
+          response = error_response(Jimson::Error::InvalidRequest.new)
+        else
+          response = create_response(request)
+        end
       rescue Jimson::Error::Generic => e
         response = error_response(e, request)
       end
@@ -48,7 +54,6 @@ module Jimson
     end
 
     def validate_request(request)
-      valid = true 
       required_keys = %w(jsonrpc method)
       required_types = {
                          'jsonrpc' => [String],
@@ -57,17 +62,19 @@ module Jimson
                          'id'      => [String, Fixnum, NilClass]
                        }
       
+      return false if !request.is_a?(Hash)
+
       required_keys.each do |key|
-        valid = false if !request.has_key?(key)
+        return false if !request.has_key?(key)
       end
 
       required_types.each do |key, types|
-        valid = false if request.has_key?(key) && !types.any? { |type| request[key].is_a?(type) }
+        return false if request.has_key?(key) && !types.any? { |type| request[key].is_a?(type) }
       end
 
-      valid = false if request['jsonrpc'] != '2.0'
+      return false if request['jsonrpc'] != '2.0'
       
-      valid
+      true
     end
 
     def create_response(request)
