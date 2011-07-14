@@ -67,7 +67,9 @@ module Jimson
                   'method'  => 'foobar',
                   'id'      => 1
                 }
-          resp = JSON.parse(@sess.post('/', req.to_json).body)
+          resp = @sess.post('/', req.to_json).body
+          puts resp
+          resp = JSON.parse(resp)
           resp.should == {
                             'jsonrpc' => '2.0',
                             'error'   => {
@@ -75,6 +77,25 @@ module Jimson
                                             'message' => 'The method does not exist.'
                                           },
                             'id'      => 1
+                          }
+        end
+      end
+
+      describe "receiving an invalid JSON request" do
+        it "returns an error response" do
+          req = {
+                  'jsonrpc' => '2.0',
+                  'method'  => 'foobar',
+                  'id'      => 1
+                }.to_json
+          req += '}' # make the json invalid
+          resp = JSON.parse(@sess.post('/', req).body)
+          resp.should == {
+                            'jsonrpc' => '2.0',
+                            'error'   => {
+                                            'code' => -32700,
+                                            'message' => 'Invalid JSON was received by the server. An error occurred on the server while parsing the JSON text.'
+                                          }
                           }
         end
       end

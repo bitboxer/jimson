@@ -12,16 +12,22 @@ module Jimson
     end
 
     def process_http_request
-      req = parse_request(@http_post_content)
-
       resp = EM::DelegatedHttpResponse.new( self )
       resp.status = 200
-      resp.content = create_response(req)
+
+      begin
+        request = parse_request(@http_post_content)
+        resp.content = create_response(request)
+      rescue Jimson::Error::ParseError => e
+        resp.content = error_response(e)
+      rescue Jimson::Error::MethodNotFound => e
+        resp.content = error_response(e, request)
+      end
+
       resp.send_response
     end
 
     def create_response(request)
-      success = false
       params = request['params']
       begin
         if params.is_a?(Hash)
@@ -29,27 +35,27 @@ module Jimson
         else
           result = @@handler.send(request['method'], *params)
         end
-        success = true
       rescue NoMethodError
-        response = error_response(request, :method_not_found)
+        raise Jimson::Error::MethodNotFound.new 
       end
 
-      response = success_response(request, result) if success
+      response = success_response(request, result)
 
       # A Notification is a Request object without an "id" member.
       # The Server MUST NOT reply to a Notification, including those 
       # that are within a batch request.
       response = nil if !request.has_key?('id')
 
-      return response 
+      response 
     end
 
-    def error_response(request, error_type)
-      {
-        'jsonrpc' => JSON_RPC_VERSION,
-        'error'   => Jimson::Error.new(error_type).to_h,
-        'id'      => request['id']
-      }.to_json
+    def error_response(error, request = nil)
+      resp = {
+               'jsonrpc' => JSON_RPC_VERSION,
+               'error'   => error.to_h,
+             }
+      resp['id'] = request['id'] if !!request && request.has_key?('id')
+      resp.to_json
     end
 
     def success_response(request, result)
@@ -62,6 +68,8 @@ module Jimson
 
     def parse_request(post)
       data = JSON.parse(post)
+      rescue 
+        raise Jimson::Error::ParseError.new 
     end
 
   end
