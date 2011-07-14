@@ -21,23 +21,43 @@ module Jimson
     end
 
     def create_response(request)
+      success = false
       params = request['params']
-      if params.is_a?(Hash)
-        result = @@handler.send(request['method'], params)
-      else
-        result = @@handler.send(request['method'], *params)
+      begin
+        if params.is_a?(Hash)
+          result = @@handler.send(request['method'], params)
+        else
+          result = @@handler.send(request['method'], *params)
+        end
+        success = true
+      rescue NoMethodError
+        response = error_response(request, :method_not_found)
       end
+
+      response = success_response(request, result) if success
 
       # A Notification is a Request object without an "id" member.
       # The Server MUST NOT reply to a Notification, including those 
       # that are within a batch request.
-      return nil if !request.has_key?('id')
+      response = nil if !request.has_key?('id')
 
-      resp = {
-               'jsonrpc' => JSON_RPC_VERSION,
-               'result'  => result,  
-               'id'      => request['id']
-             }.to_json
+      return response 
+    end
+
+    def error_response(request, error_type)
+      {
+        'jsonrpc' => JSON_RPC_VERSION,
+        'error'   => Jimson::Error.new(error_type).to_h,
+        'id'      => request['id']
+      }.to_json
+    end
+
+    def success_response(request, result)
+      {
+        'jsonrpc' => JSON_RPC_VERSION,
+        'result'  => result,  
+        'id'      => request['id']
+      }.to_json
     end
 
     def parse_request(post)

@@ -60,5 +60,24 @@ module Jimson
         end
       end
 
+      describe "receiving a call for a non-existent method" do
+        it "returns an error response" do
+          req = {
+                  'jsonrpc' => '2.0',
+                  'method'  => 'foobar',
+                  'id'      => 1
+                }
+          resp = JSON.parse(@sess.post('/', req.to_json).body)
+          resp.should == {
+                            'jsonrpc' => '2.0',
+                            'error'   => {
+                                            'code' => -32601,
+                                            'message' => 'The method does not exist.'
+                                          },
+                            'id'      => 1
+                          }
+        end
+      end
+
   end
 end

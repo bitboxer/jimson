@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'jimson/error'
 require 'jimson/server'
 require 'jimson/client'
 
