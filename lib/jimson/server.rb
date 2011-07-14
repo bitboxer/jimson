@@ -33,7 +33,9 @@ module Jimson
         response = error_response(e, request)
       end
 
-      return nil if response.nil?
+      response.compact! if response.is_a?(Array)
+
+      return nil if response.nil? || (response.respond_to?(:empty?) && response.empty?)
 
       response.to_json
     end

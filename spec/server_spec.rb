@@ -136,5 +136,26 @@ module Jimson
         end
       end
 
+      describe "receiving a batch request" do
+        context "when all the requests are notifications" do
+          it "returns no response" do
+            req = [
+                    {
+                      'jsonrpc' => '2.0',
+                      'method'  => 'update',
+                      'params'  => [1,2,3,4,5]
+                    },
+                    {
+                      'jsonrpc' => '2.0',
+                      'method'  => 'update',
+                      'params'  => [1,2,3,4,5]
+                    }
+                  ]
+            resp = @sess.post('/', req.to_json).body
+            resp.should be_empty
+          end
+        end
+      end
+
   end
 end
