@@ -14,22 +14,37 @@ module Jimson
     def process_http_request
       resp = EM::DelegatedHttpResponse.new( self )
       resp.status = 200
+      resp.content = process_post(@http_post_content)
+      resp.send_response
+    end
 
+    def process_post(content)
       begin
         request = parse_request(@http_post_content)
-        if !validate_request(request)
-          raise Jimson::Error::InvalidRequest.new
+        if request.is_a?(Array)
+          response = request.map { |req| handle_request(req) }
+        else
+          response = handle_request(request)
         end
-        resp.content = create_response(request)
       rescue Jimson::Error::ParseError => e
-        resp.content = error_response(e)
-      rescue Jimson::Error::MethodNotFound => e
-        resp.content = error_response(e, request)
-      rescue Jimson::Error::InvalidRequest => e
-        resp.content = error_response(e, request)
+        response = error_response(e)
       end
 
-      resp.send_response
+      return nil if response.nil?
+
+      response.to_json
+    end
+
+    def handle_request(request)
+      response = nil
+      begin
+        raise Jimson::Error::InvalidRequest.new if !validate_request(request)
+        response = create_response(request)
+      rescue Jimson::Error::Generic => e
+        response = error_response(e, request)
+      end
+
+      response
     end
 
     def validate_request(request)
@@ -88,7 +103,7 @@ module Jimson
         resp['id'] = nil
       end
 
-      resp.to_json
+      resp
     end
 
     def success_response(request, result)
@@ -96,7 +111,7 @@ module Jimson
         'jsonrpc' => JSON_RPC_VERSION,
         'result'  => result,  
         'id'      => request['id']
-      }.to_json
+      }
     end
 
     def parse_request(post)
