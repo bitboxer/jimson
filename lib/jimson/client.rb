@@ -1,10 +1,17 @@
-require 'net/http'
+require 'patron'
 
 module Jimson
   class ClientHelper
+
+    def self.make_id
+      rand(10**12)
+    end
+
     def initialize(url)
       @http = Patron::Session.new
-      @uri = URI.parse(url)
+      uri = URI(url)
+      @path = uri.path
+      @http.base_url = "#{uri.scheme}://#{uri.host}:#{uri.port}"
     end
 
     def process_call(sym, args)
@@ -12,16 +19,11 @@ module Jimson
                     'jsonrpc' => '2.0',
                     'method'  => sym.to_s,
                     'params'  => args,
-                    'id'      => make_id
+                    'id'      => self.class.make_id
                   }.to_json
-      Net::HTTP.post(@uri, post_data)
+      @http.post(@path, post_data)
     end
 
-    protected
-
-    def make_id
-      rand(10**12)
-    end
   end
 
   class Client

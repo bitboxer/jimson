@@ -12,13 +12,19 @@ module Jimson
     describe "sending a single request" do
       context "when using positional parameters" do
         it "sends a valid JSON-RPC request" do
-          client = Client.new(CLIENT_SPEC_URL)
+          expected = {
+                       'jsonrpc' => '2.0',
+                       'method'  => 'foo',
+                       'params'  => [1,2,3],
+                       'id'      => 1
+                     }.to_json
+          http_mock = mock('http')
+          Patron::Session.stub!(:new).and_return(http_mock)
+          http_mock.should_receive(:base_url=).with(SPEC_URL)
+          http_mock.should_receive(:post).with('', expected)
+          ClientHelper.stub!(:make_id).and_return(1)
+          client = Client.new(SPEC_URL)
           client.foo(1,2,3)
-          req = JSON.parse(FakeWeb.last_request.body)
-          req['jsonrpc'].should == '2.0'
-          req['id'].should be_a(Fixnum)
-          req['method'].should == 'foo'
-          req['params'].should == [1,2,3]
         end
       end
     end

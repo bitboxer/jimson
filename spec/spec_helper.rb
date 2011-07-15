@@ -6,8 +6,7 @@ require 'json'
 require 'patron'
 require 'fakeweb'
 
-SERVER_SPEC_URL = 'http://localhost:8999'
-CLIENT_SPEC_URL = 'http://example.com'
+SPEC_URL = 'http://localhost:8999'
 
 
 def fake_response(json)

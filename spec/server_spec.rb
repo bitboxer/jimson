@@ -13,7 +13,7 @@ module Jimson
                                       }
       before(:each) do
         @sess = Patron::Session.new
-        @sess.base_url = SERVER_SPEC_URL
+        @sess.base_url = SPEC_URL
       end
 
       describe "receiving a request with positional parameters" do
