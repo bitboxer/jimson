@@ -6,6 +6,7 @@ module Jimson
       @http_mock = mock('http')
       Patron::Session.stub!(:new).and_return(@http_mock)
       @http_mock.should_receive(:base_url=).with(SPEC_URL)
+      @resp_mock = mock('http_response')
       ClientHelper.stub!(:make_id).and_return(1)
     end
 
@@ -22,14 +23,10 @@ module Jimson
                        'id'      => 1
                      }.to_json
         end
-        it "sends a valid JSON-RPC request" do
-          @http_mock.should_receive(:post).with('', @expected).and_return(RESPONSE_BOILERPLATE)
-          client = Client.new(SPEC_URL)
-          client.foo(1,2,3)
-        end
-        it "returns the result from the server" do
-          response = RESPONSE_BOILERPLATE.merge({'result' => 42})
-          @http_mock.should_receive(:post).with('', @expected).and_return(response)
+        it "sends a valid JSON-RPC request and returns the result" do
+          response = RESPONSE_BOILERPLATE.merge({'result' => 42}).to_json
+          @http_mock.should_receive(:post).with('', @expected).and_return(@resp_mock)
+          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
           client = Client.new(SPEC_URL)
           client.foo(1,2,3).should == 42
         end

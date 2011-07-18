@@ -22,10 +22,19 @@ module Jimson
                     'id'      => self.class.make_id
                   }.to_json
       resp = @http.post(@path, post_data)
-      if resp.nil? || !resp.is_a?(Hash)
+      if resp.nil? || resp.body.nil? || resp.body.empty?
         raise Jimson::ClientError::InvalidResponse.new
       end
-      resp['result']
+
+      json = resp.body
+
+      begin
+        data = JSON.parse(json)
+      rescue
+        raise Jimson::ClientError::InvalidJSON.new(json)
+      end
+
+      data['result']
     end
 
   end
