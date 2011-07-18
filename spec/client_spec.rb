@@ -1,6 +1,6 @@
 module Jimson
   describe Client do
-    RESPONSE_BOILERPLATE = {'jsonrpc' => '2.0', 'id' => 1}
+    BOILERPLATE = {'jsonrpc' => '2.0', 'id' => 1}
 
     before(:each) do
       @http_mock = mock('http')
@@ -24,7 +24,7 @@ module Jimson
                      }.to_json
         end
         it "sends a valid JSON-RPC request and returns the result" do
-          response = RESPONSE_BOILERPLATE.merge({'result' => 42}).to_json
+          response = BOILERPLATE.merge({'result' => 42}).to_json
           @http_mock.should_receive(:post).with('', @expected).and_return(@resp_mock)
           @resp_mock.should_receive(:body).at_least(:once).and_return(response)
           client = Client.new(SPEC_URL)

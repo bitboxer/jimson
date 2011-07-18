@@ -47,5 +47,12 @@ module Jimson
       end
     end
 
+    CODES = {
+              -32700 => ParseError,
+              -32600 => InvalidRequest,
+              -32601 => MethodNotFound,
+              -32602 => InvalidParams,
+              -32603 => InternalError
+            }
   end
 end
