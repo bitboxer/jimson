@@ -14,7 +14,19 @@ module Jimson
       @http.base_url = "#{uri.scheme}://#{uri.host}:#{uri.port}"
     end
 
-    def send_request(method, args)
+    def process_call(sym, args)
+      resp = send_single_request(sym.to_s, args)
+
+      begin
+        data = JSON.parse(resp)
+      rescue
+        raise Jimson::ClientError::InvalidJSON.new(json)
+      end
+
+      return handle_response(data)
+    end
+
+    def send_single_request(method, args)
       post_data = {
                     'jsonrpc' => '2.0',
                     'method'  => method,
@@ -32,17 +44,7 @@ module Jimson
         raise new Jimson::ClientError::InternalError.new($!)
     end
 
-    def process_call(sym, args)
-      resp = send_request(sym.to_s, args)
-
-      json = resp 
-
-      begin
-        data = JSON.parse(json)
-      rescue
-        raise Jimson::ClientError::InvalidJSON.new(json)
-      end
-
+    def handle_response(data)
       raise Jimson::ClientError::InvalidResponse.new if !valid_response?(data)
 
       if !!data['error']
