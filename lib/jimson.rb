@@ -1,6 +1,7 @@
 require 'rubygems'
-require 'jimson/error'
+require 'jimson/server_error'
 require 'jimson/server'
+require 'jimson/client_error'
 require 'jimson/client'
 
 module Jimson

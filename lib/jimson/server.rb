@@ -22,17 +22,17 @@ module Jimson
       begin
         request = parse_request(@http_post_content)
         if request.is_a?(Array)
-          raise Jimson::Error::InvalidRequest.new if request.empty?
+          raise Jimson::ServerError::InvalidRequest.new if request.empty?
           response = request.map { |req| handle_request(req) }
         else
           response = handle_request(request)
         end
-      rescue Jimson::Error::ParseError, Jimson::Error::InvalidRequest => e
+      rescue Jimson::ServerError::ParseError, Jimson::ServerError::InvalidRequest => e
         response = error_response(e)
-      rescue Jimson::Error::Generic => e
+      rescue Jimson::ServerError::Generic => e
         response = error_response(e, request)
       rescue StandardError, Exception
-        response = error_response(Jimson::Error::InternalError.new)
+        response = error_response(Jimson::ServerError::InternalError.new)
       end
 
       response.compact! if response.is_a?(Array)
@@ -46,11 +46,11 @@ module Jimson
       response = nil
       begin
         if !validate_request(request)
-          response = error_response(Jimson::Error::InvalidRequest.new)
+          response = error_response(Jimson::ServerError::InvalidRequest.new)
         else
           response = create_response(request)
         end
-      rescue Jimson::Error::Generic => e
+      rescue Jimson::ServerError::Generic => e
         response = error_response(e, request)
       end
 
@@ -90,9 +90,9 @@ module Jimson
           result = @@handler.send(request['method'], *params)
         end
       rescue NoMethodError
-        raise Jimson::Error::MethodNotFound.new 
+        raise Jimson::ServerError::MethodNotFound.new 
       rescue ArgumentError
-        raise Jimson::Error::InvalidParams.new
+        raise Jimson::ServerError::InvalidParams.new
       end
 
       response = success_response(request, result)
@@ -130,7 +130,7 @@ module Jimson
     def parse_request(post)
       data = JSON.parse(post)
       rescue 
-        raise Jimson::Error::ParseError.new 
+        raise Jimson::ServerError::ParseError.new 
     end
 
   end

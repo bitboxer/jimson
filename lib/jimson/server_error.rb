@@ -1,5 +1,5 @@
 module Jimson
-  module Error
+  module ServerError
     class Generic < Exception
       attr_accessor :code, :message
 

@@ -21,7 +21,11 @@ module Jimson
                     'params'  => args,
                     'id'      => self.class.make_id
                   }.to_json
-      @http.post(@path, post_data)
+      resp = @http.post(@path, post_data)
+      if resp.nil? || !resp.is_a?(Hash)
+        raise Jimson::ClientError::InvalidResponse.new
+      end
+      resp['result']
     end
 
   end
