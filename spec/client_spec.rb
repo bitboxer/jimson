@@ -33,5 +33,34 @@ module Jimson
       end
     end
 
+    describe "sending a batch request" do
+      it "sends a valid JSON-RPC batch request and puts the results in the response objects" do
+        batch = [
+            {"jsonrpc" => "2.0", "method" => "sum", "params" => [1,2,4], "id" => "1"},
+            {"jsonrpc" => "2.0", "method" => "subtract", "params" => [42,23], "id" => "2"},
+            {"jsonrpc" => "2.0", "method" => "foo_get", "params" => [{"name" => "myself"}], "id" => "5"},
+            {"jsonrpc" => "2.0", "method" => "get_data", "id" => "9"} 
+        ].to_json
+
+        response = [
+            {"jsonrpc" => "2.0", "result" => 7, "id" => "1"},
+            {"jsonrpc" => "2.0", "result" => 19, "id" => "2"},
+            {"jsonrpc" => "2.0", "error" => {"code" => -32601, "message" => "Method not found."}, "id" => "5"},
+            {"jsonrpc" => "2.0", "result" => ["hello", 5], "id" => "9"}
+        ].to_json
+
+        ClientHelper.stub!(:make_id).and_return('1', '2', '5', '9')
+        @http_mock.should_receive(:post).with('', batch).and_return(@resp_mock)
+        @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+        client = Client.new(SPEC_URL)
+        Jimson::Client.batch(client) do |batch|
+          sum = batch.sum(1,2,4)
+          subtract = batch.subtract(42,23)
+          foo = batch.foo_get('name' => 'myself')
+          data = batch.get_data
+        end
+      end
+    end
+
   end
 end

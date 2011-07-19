@@ -14,7 +14,7 @@ module Jimson
 
     class InternalError < Exception
       def initialize(e)
-        super("An internal client error occurred when processing the request: #{e}")
+        super("An internal client error occurred when processing the request: #{e}\n#{e.backtrace.join("\n")}")
       end
     end
 

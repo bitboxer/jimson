@@ -12,6 +12,7 @@ module Jimson
       uri = URI(url)
       @path = uri.path
       @http.base_url = "#{uri.scheme}://#{uri.host}:#{uri.port}"
+      @batch = []
     end
 
     def process_call(sym, args)
@@ -23,7 +24,7 @@ module Jimson
         raise Jimson::ClientError::InvalidJSON.new(json)
       end
 
-      return handle_response(data)
+      return process_single_response(data)
     end
 
     def send_single_request(method, args)
@@ -44,7 +45,25 @@ module Jimson
         raise new Jimson::ClientError::InternalError.new($!)
     end
 
-    def handle_response(data)
+    def send_batch_request(batch)
+      post_data = batch.to_json
+      resp = @http.post(@path, post_data)
+      if resp.nil? || resp.body.nil? || resp.body.empty?
+        raise Jimson::ClientError::InvalidResponse.new
+      end
+
+      return resp.body
+    end
+
+    def process_batch_response(responses)
+      responses.each do |resp|
+        saved_response = @batch.map { |r| r[1] }.select { |r| r.id == resp['id'] }.first
+        raise Jimson::ClientError::InvalidResponse.new unless !!saved_response
+        saved_response.populate!(resp)
+      end
+    end
+
+    def process_single_response(data)
       raise Jimson::ClientError::InvalidResponse.new if !valid_response?(data)
 
       if !!data['error']
@@ -87,9 +106,49 @@ module Jimson
         return false
     end
 
+    def push_batch_request(request)
+      request.id = self.class.make_id
+      response = Jimson::Response.new(request.id)
+      @batch << [request, response]
+    end
+
+    def send_batch
+      batch = @batch.map(&:first) # get the requests 
+      response = send_batch_request(batch)
+
+      begin
+        responses = JSON.parse(response)
+      rescue
+        raise Jimson::ClientError::InvalidJSON.new(json)
+      end
+
+      process_batch_response(responses)
+      @batch = []
+    end
+
+  end
+
+  class BatchClient
+    
+    def initialize(helper)
+      @helper = helper
+    end
+
+    def method_missing(sym, *args, &block)
+      request = Jimson::Request.new(sym.to_s, args)
+      @helper.push_batch_request(request) 
+    end
+
   end
 
   class Client
+    
+    def self.batch(client)
+      helper = client.instance_variable_get(:@helper)
+      batch_client = BatchClient.new(helper)
+      yield batch_client
+      helper.send_batch
+    end
 
     def initialize(url)
       @helper = ClientHelper.new(url)
