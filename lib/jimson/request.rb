@@ -17,8 +17,8 @@ module Jimson
       h.merge!('id' => id)
     end
 
-    def to_json(s)
-      self.to_h.to_json
+    def to_json(*a)
+      self.to_h.to_json(*a)
     end
 
   end
