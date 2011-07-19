@@ -13,6 +13,14 @@ module Jimson
       h.merge!('id' => @id)
     end
 
+    def is_error?
+      !!@error
+    end
+
+    def succeeded?
+      !!@result
+    end
+
     def populate!(data)
       @error = data['error'] if !!data['error']
       @result = data['result'] if !!data['result']

@@ -62,9 +62,16 @@ module Jimson
           data = batch.get_data
         end
 
+        sum.succeeded?.should be_true
+        sum.is_error?.should be_false
         sum.result.should == 7
+
         subtract.result.should == 19
+
+        foo.is_error?.should be_true
+        foo.succeeded?.should be_false
         foo.error['code'].should == -32601
+
         data.result.should == ['hello', 5]
       end
     end
