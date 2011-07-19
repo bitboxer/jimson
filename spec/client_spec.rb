@@ -53,12 +53,19 @@ module Jimson
         @http_mock.should_receive(:post).with('', batch).and_return(@resp_mock)
         @resp_mock.should_receive(:body).at_least(:once).and_return(response)
         client = Client.new(SPEC_URL)
+
+        sum = subtract = foo = data = nil
         Jimson::Client.batch(client) do |batch|
           sum = batch.sum(1,2,4)
           subtract = batch.subtract(42,23)
           foo = batch.foo_get('name' => 'myself')
           data = batch.get_data
         end
+
+        sum.result.should == 7
+        subtract.result.should == 19
+        foo.error['code'].should == -32601
+        data.result.should == ['hello', 5]
       end
     end
 

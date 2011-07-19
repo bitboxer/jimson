@@ -110,6 +110,7 @@ module Jimson
       request.id = self.class.make_id
       response = Jimson::Response.new(request.id)
       @batch << [request, response]
+      return response
     end
 
     def send_batch
