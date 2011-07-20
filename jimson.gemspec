@@ -9,7 +9,7 @@ spec = Gem::Specification.new do |s|
   s.has_rdoc = false 
   #s.rdoc_options << '-m' << 'README.rdoc' << '-t' << 'Jimson'
   s.extra_rdoc_files = ["README.rdoc"]
-  s.add_dependency("patron", ">= 0.4.12")
+  s.add_dependency("rest-client", ">= 1.6.3")
   s.add_dependency("eventmachine", ">= 0.12.10")
   s.add_dependency("eventmachine_httpserver", ">= 0.2.1")
   s.add_dependency("json", ">= 1.5.1")

@@ -1,4 +1,4 @@
-require 'patron'
+require 'rest-client'
 require 'jimson/server_error'
 require 'jimson/client_error'
 require 'jimson/request'
@@ -13,10 +13,8 @@ module Jimson
     end
 
     def initialize(url)
-      @http = Patron::Session.new
-      uri = URI(url)
-      @path = uri.path
-      @http.base_url = "#{uri.scheme}://#{uri.host}:#{uri.port}"
+      @url = url
+      URI.parse(@url) # for the sake of validating the url
       @batch = []
     end
 
@@ -39,7 +37,7 @@ module Jimson
                     'params'  => args,
                     'id'      => self.class.make_id
                   }.to_json
-      resp = @http.post(@path, post_data)
+      resp = RestClient.post(@url, post_data, :content_type => 'application/json')
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise Jimson::ClientError::InvalidResponse.new
       end
@@ -52,7 +50,7 @@ module Jimson
 
     def send_batch_request(batch)
       post_data = batch.to_json
-      resp = @http.post(@path, post_data)
+      resp = RestClient.post(@url, post_data, :content_type => 'application/json')
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise Jimson::ClientError::InvalidResponse.new
       end
