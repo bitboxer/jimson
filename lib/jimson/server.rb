@@ -93,6 +93,8 @@ module Jimson
         raise Jimson::ServerError::MethodNotFound.new 
       rescue ArgumentError
         raise Jimson::ServerError::InvalidParams.new
+      rescue
+        raise Jimson::ServerError::ApplicationError.new($!)
       end
 
       response = success_response(request, result)
