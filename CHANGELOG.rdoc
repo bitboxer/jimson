@@ -1,0 +1,5 @@
+== 0.2.0 / 2011-07-20
+
+* Major enhancements
+
+  * Replace patron with rest-client for JRuby compatibility in the client
