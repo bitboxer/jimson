@@ -1,6 +1,7 @@
 require 'rubygems'
 $:.unshift(File.dirname(__FILE__) + '/../lib/')
-require 'jimson'
+require 'jimson/server'
+require 'jimson/client'
 require 'open-uri'
 require 'json'
 require 'patron'

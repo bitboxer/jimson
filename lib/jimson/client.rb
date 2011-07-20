@@ -1,7 +1,12 @@
 require 'patron'
+require 'jimson/server_error'
+require 'jimson/client_error'
+require 'jimson/request'
+require 'jimson/response'
 
 module Jimson
   class ClientHelper
+    JSON_RPC_VERSION = '2.0'
 
     def self.make_id
       rand(10**12)
@@ -29,7 +34,7 @@ module Jimson
 
     def send_single_request(method, args)
       post_data = {
-                    'jsonrpc' => '2.0',
+                    'jsonrpc' => JSON_RPC_VERSION,
                     'method'  => method,
                     'params'  => args,
                     'id'      => self.class.make_id
@@ -84,7 +89,7 @@ module Jimson
     def valid_response?(data)
       return false if !data.is_a?(Hash)
 
-      return false if data['jsonrpc'] != '2.0'
+      return false if data['jsonrpc'] != JSON_RPC_VERSION
 
       return false if !data.has_key?('id')
 
