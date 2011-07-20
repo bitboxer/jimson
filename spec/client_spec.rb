@@ -3,9 +3,6 @@ module Jimson
     BOILERPLATE = {'jsonrpc' => '2.0', 'id' => 1}
 
     before(:each) do
-      @http_mock = mock('http')
-      Patron::Session.stub!(:new).and_return(@http_mock)
-      @http_mock.should_receive(:base_url=).with(SPEC_URL)
       @resp_mock = mock('http_response')
       ClientHelper.stub!(:make_id).and_return(1)
     end
@@ -25,7 +22,7 @@ module Jimson
         end
         it "sends a valid JSON-RPC request and returns the result" do
           response = BOILERPLATE.merge({'result' => 42}).to_json
-          @http_mock.should_receive(:post).with('', @expected).and_return(@resp_mock)
+          RestClient.should_receive(:post).with(SPEC_URL, @expected, {:content_type => 'application/json'}).and_return(@resp_mock)
           @resp_mock.should_receive(:body).at_least(:once).and_return(response)
           client = Client.new(SPEC_URL)
           client.foo(1,2,3).should == 42
@@ -50,7 +47,7 @@ module Jimson
         ].to_json
 
         ClientHelper.stub!(:make_id).and_return('1', '2', '5', '9')
-        @http_mock.should_receive(:post).with('', batch).and_return(@resp_mock)
+        RestClient.should_receive(:post).with(SPEC_URL, batch, {:content_type => 'application/json'}).and_return(@resp_mock)
         @resp_mock.should_receive(:body).at_least(:once).and_return(response)
         client = Client.new(SPEC_URL)
 

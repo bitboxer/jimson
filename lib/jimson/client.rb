@@ -1,17 +1,20 @@
-require 'patron'
+require 'rest-client'
+require 'jimson/server_error'
+require 'jimson/client_error'
+require 'jimson/request'
+require 'jimson/response'
 
 module Jimson
   class ClientHelper
+    JSON_RPC_VERSION = '2.0'
 
     def self.make_id
       rand(10**12)
     end
 
     def initialize(url)
-      @http = Patron::Session.new
-      uri = URI(url)
-      @path = uri.path
-      @http.base_url = "#{uri.scheme}://#{uri.host}:#{uri.port}"
+      @url = url
+      URI.parse(@url) # for the sake of validating the url
       @batch = []
     end
 
@@ -29,12 +32,12 @@ module Jimson
 
     def send_single_request(method, args)
       post_data = {
-                    'jsonrpc' => '2.0',
+                    'jsonrpc' => JSON_RPC_VERSION,
                     'method'  => method,
                     'params'  => args,
                     'id'      => self.class.make_id
                   }.to_json
-      resp = @http.post(@path, post_data)
+      resp = RestClient.post(@url, post_data, :content_type => 'application/json')
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise Jimson::ClientError::InvalidResponse.new
       end
@@ -47,7 +50,7 @@ module Jimson
 
     def send_batch_request(batch)
       post_data = batch.to_json
-      resp = @http.post(@path, post_data)
+      resp = RestClient.post(@url, post_data, :content_type => 'application/json')
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise Jimson::ClientError::InvalidResponse.new
       end
@@ -84,7 +87,7 @@ module Jimson
     def valid_response?(data)
       return false if !data.is_a?(Hash)
 
-      return false if data['jsonrpc'] != '2.0'
+      return false if data['jsonrpc'] != JSON_RPC_VERSION
 
       return false if !data.has_key?('id')
 

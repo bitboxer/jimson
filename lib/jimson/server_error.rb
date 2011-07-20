@@ -47,6 +47,12 @@ module Jimson
       end
     end
 
+    class ApplicationError < Generic
+      def initialize(err)
+        super(-32099, "The application being served raised an error: #{err}")
+      end
+    end
+
     CODES = {
               -32700 => ParseError,
               -32600 => InvalidRequest,

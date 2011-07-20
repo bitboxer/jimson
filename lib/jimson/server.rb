@@ -2,10 +2,13 @@ require 'eventmachine'
 require 'evma_httpserver'
 require 'logger'
 require 'json'
+require 'jimson/server_error'
 
 module Jimson
   class HttpServer < EM::Connection
     include EM::HttpServer
+
+    JSON_RPC_VERSION = '2.0'
 
     def self.handler=(handler)
       @@handler = handler
@@ -76,7 +79,7 @@ module Jimson
         return false if request.has_key?(key) && !types.any? { |type| request[key].is_a?(type) }
       end
 
-      return false if request['jsonrpc'] != '2.0'
+      return false if request['jsonrpc'] != JSON_RPC_VERSION
       
       true
     end
@@ -93,6 +96,8 @@ module Jimson
         raise Jimson::ServerError::MethodNotFound.new 
       rescue ArgumentError
         raise Jimson::ServerError::InvalidParams.new
+      rescue
+        raise Jimson::ServerError::ApplicationError.new($!)
       end
 
       response = success_response(request, result)

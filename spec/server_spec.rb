@@ -12,8 +12,7 @@ module Jimson
                                         'id'      => nil
                                       }
       before(:each) do
-        @sess = Patron::Session.new
-        @sess.base_url = SPEC_URL
+        @url = SPEC_URL
       end
 
       describe "receiving a request with positional parameters" do
@@ -25,7 +24,7 @@ module Jimson
                     'params'  => [24, 20],
                     'id'      => 1
                   }
-            resp = JSON.parse(@sess.post('/', req.to_json).body)
+            resp = JSON.parse(RestClient.post(@url, req.to_json).body)
             resp.should == {
                              'jsonrpc' => '2.0',
                              'result'  => 4,
@@ -44,7 +43,7 @@ module Jimson
                     'params'  => {'subtrahend'=> 20, 'minuend' => 24},
                     'id'      => 1
                   }
-            resp = JSON.parse(@sess.post('/', req.to_json).body)
+            resp = JSON.parse(RestClient.post(@url, req.to_json).body)
             resp.should == {
                              'jsonrpc' => '2.0',
                              'result'  => 4,
@@ -62,7 +61,7 @@ module Jimson
                     'method'  => 'update',
                     'params'  => [1,2,3,4,5]
                   }
-            resp = @sess.post('/', req.to_json).body
+            resp = RestClient.post(@url, req.to_json).body
             resp.should be_empty
           end
         end
@@ -75,7 +74,7 @@ module Jimson
                   'method'  => 'foobar',
                   'id'      => 1
                 }
-          resp = JSON.parse(@sess.post('/', req.to_json).body)
+          resp = JSON.parse(RestClient.post(@url, req.to_json).body)
           resp.should == {
                             'jsonrpc' => '2.0',
                             'error'   => {
@@ -95,7 +94,7 @@ module Jimson
                   'params'  => [1,2,3],
                   'id'      => 1
                 }
-          resp = JSON.parse(@sess.post('/', req.to_json).body)
+          resp = JSON.parse(RestClient.post(@url, req.to_json).body)
           resp.should == {
                             'jsonrpc' => '2.0',
                             'error'   => {
@@ -115,7 +114,7 @@ module Jimson
                   'id'      => 1
                 }.to_json
           req += '}' # make the json invalid
-          resp = JSON.parse(@sess.post('/', req).body)
+          resp = JSON.parse(RestClient.post(@url, req).body)
           resp.should == {
                             'jsonrpc' => '2.0',
                             'error'   => {
@@ -134,7 +133,7 @@ module Jimson
                     'jsonrpc' => '2.0',
                     'method'  => 1 # method as int is invalid
                   }.to_json
-            resp = JSON.parse(@sess.post('/', req).body)
+            resp = JSON.parse(RestClient.post(@url, req).body)
             resp.should == INVALID_RESPONSE_EXPECTATION 
           end
         end
@@ -142,7 +141,7 @@ module Jimson
         context "when the request is an empty batch" do
           it "returns an error response" do
             req = [].to_json
-            resp = JSON.parse(@sess.post('/', req).body)
+            resp = JSON.parse(RestClient.post(@url, req).body)
             resp.should == INVALID_RESPONSE_EXPECTATION
           end
         end
@@ -150,7 +149,7 @@ module Jimson
         context "when the request is an invalid batch" do
           it "returns an error response" do
             req = [1,2].to_json
-            resp = JSON.parse(@sess.post('/', req).body)
+            resp = JSON.parse(RestClient.post(@url, req).body)
             resp.should == [INVALID_RESPONSE_EXPECTATION, INVALID_RESPONSE_EXPECTATION] 
           end
         end
@@ -167,7 +166,7 @@ module Jimson
                       {'jsonrpc' => '2.0', 'method' => 'foo.get', 'params' => {'name' => 'myself'}, 'id' => '5'},
                       {'jsonrpc' => '2.0', 'method' => 'get_data', 'id' => '9'} 
                    ].to_json
-            resp = JSON.parse(@sess.post('/', reqs).body)
+            resp = JSON.parse(RestClient.post(@url, reqs).body)
             resp.should == [
                     {'jsonrpc' => '2.0', 'result' => 7, 'id' => '1'},
                     {'jsonrpc' => '2.0', 'result' => 19, 'id' => '2'},
@@ -192,7 +191,7 @@ module Jimson
                       'params'  => [1,2,3,4,5]
                     }
                   ]
-            resp = @sess.post('/', req.to_json).body
+            resp = RestClient.post(@url, req.to_json).body
             resp.should be_empty
           end
         end
