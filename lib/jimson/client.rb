@@ -45,7 +45,7 @@ module Jimson
       return resp.body
 
       rescue Exception, StandardError
-        raise new Jimson::ClientError::InternalError.new($!)
+        raise Jimson::ClientError::InternalError.new($!)
     end
 
     def send_batch_request(batch)
@@ -81,7 +81,7 @@ module Jimson
       return data['result']
 
       rescue Exception, StandardError
-        raise new Jimson::ClientError::InternalError.new
+        raise Jimson::ClientError::InternalError.new
     end
 
     def valid_response?(data)
