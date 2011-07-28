@@ -24,7 +24,7 @@ module Jimson
       begin
         data = JSON.parse(resp)
       rescue
-        raise Jimson::ClientError::InvalidJSON.new(json)
+        raise Jimson::ClientError::InvalidJSON.new(resp)
       end
 
       return process_single_response(data)
