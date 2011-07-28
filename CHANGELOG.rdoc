@@ -1,3 +1,9 @@
+== 0.2.2 / 2011-07-28
+
+* Bug fixes
+
+  * Fix invalid local variable error in client error handling
+
 == 0.2.1 / 2011-07-27
 
 * Bug fixes
