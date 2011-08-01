@@ -81,7 +81,7 @@ module Jimson
       return data['result']
 
       rescue Exception, StandardError
-        raise Jimson::ClientError::InternalError.new
+        raise Jimson::ClientError::InternalError.new($!)
     end
 
     def valid_response?(data)
