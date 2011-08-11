@@ -80,8 +80,10 @@ module Jimson
 
       return data['result']
 
-      rescue Exception, StandardError
-        raise Jimson::ClientError::InternalError.new($!)
+      rescue Jimson::ClientError::Generic, Jimson::ServerError::Generic => e
+        raise e
+      rescue Exception, StandardError => e
+        raise Jimson::ClientError::InternalError.new(e)
     end
 
     def valid_response?(data)

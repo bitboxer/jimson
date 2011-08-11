@@ -1,3 +1,15 @@
+== 0.3.1 / 2011-08-11
+
+* Minor enhancements
+
+  * Refactor the way the server is intantiated/started to work better with config.ru
+
+== 0.3.0 / 2011-08-11
+
+* Major enhancements
+
+  * Replace eventmachine-httpserver with rack for more cross-platform goodness
+
 == 0.2.3 / 2011-08-01
 
 * Bug fixes

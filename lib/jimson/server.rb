@@ -1,29 +1,56 @@
-require 'eventmachine'
-require 'evma_httpserver'
-require 'logger'
+require 'rack'
+require 'rack/request'
+require 'rack/response'
 require 'json'
-require 'jimson/server_error'
 
 module Jimson
-  class HttpServer < EM::Connection
-    include EM::HttpServer
-
+  class Server
+    
     JSON_RPC_VERSION = '2.0'
 
-    def self.handler=(handler)
-      @@handler = handler
+    attr_accessor :handler, :host, :port
+
+    #
+    # +handler+ is an instance of the class to expose as a JSON-RPC server
+    #
+    # +opts+ may include:
+    # * :host - the hostname or ip to bind to
+    # * :port - the port to listen on
+    # * :server - the rack handler to use, e.g. 'webrick' or 'thin'
+    #
+    def initialize(handler, opts = {})
+      @handler = handler
+      @host = opts[:host] || '0.0.0.0'
+      @port = opts[:port] || 8999
+      @server = opts[:server] || 'webrick'
     end
 
-    def process_http_request
-      resp = EM::DelegatedHttpResponse.new( self )
-      resp.status = 200
-      resp.content = process_post(@http_post_content)
-      resp.send_response
+    #
+    # Starts the server so it can process requests
+    #
+    def start
+      Rack::Server.start(
+        :server => @server,
+        :app    => self,
+        :Host   => @host,
+        :Port   => @port
+      )
     end
 
-    def process_post(content)
+    #
+    # Entry point for Rack
+    #
+    def call(env)
+      req = Rack::Request.new(env)
+      resp = Rack::Response.new
+      return resp.finish if !req.post?
+      resp.write process(req.body.read)
+      resp.finish
+    end
+
+    def process(content)
       begin
-        request = parse_request(@http_post_content)
+        request = parse_request(content)
         if request.is_a?(Array)
           raise Jimson::ServerError::InvalidRequest.new if request.empty?
           response = request.map { |req| handle_request(req) }
@@ -88,9 +115,9 @@ module Jimson
       params = request['params']
       begin
         if params.is_a?(Hash)
-          result = @@handler.send(request['method'], params)
+          result = @handler.send(request['method'], params)
         else
-          result = @@handler.send(request['method'], *params)
+          result = @handler.send(request['method'], *params)
         end
       rescue NoMethodError
         raise Jimson::ServerError::MethodNotFound.new 
@@ -136,27 +163,6 @@ module Jimson
       data = JSON.parse(post)
       rescue 
         raise Jimson::ServerError::ParseError.new 
-    end
-
-  end
-
-  class Server
-    
-    attr_accessor :handler, :host, :port, :logger
-
-    def initialize(handler, host = '0.0.0.0', port = 8999, logger = Logger.new(STDOUT))
-      @handler = handler
-      @host = host
-      @port = port
-      @logger = logger
-    end
-
-    def start
-      Jimson::HttpServer.handler = @handler
-      EM.run do
-        EM::start_server(@host, @port, Jimson::HttpServer)
-        @logger.info("Server listening on #{@host}:#{@port} with handler '#{@handler}'")
-      end
     end
 
   end
