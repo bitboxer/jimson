@@ -1,3 +1,9 @@
+== 0.3.1 / 2011-08-11
+
+* Minor enhancements
+
+  * Refactor the way the server is intantiated/started to work better with config.ru
+
 == 0.3.0 / 2011-08-11
 
 * Major enhancements
