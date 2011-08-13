@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 module Jimson
   describe Client do
     BOILERPLATE = {'jsonrpc' => '2.0', 'id' => 1}

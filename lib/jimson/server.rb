@@ -2,6 +2,7 @@ require 'rack'
 require 'rack/request'
 require 'rack/response'
 require 'json'
+require 'jimson/server/error'
 
 module Jimson
   class Server
@@ -52,17 +53,17 @@ module Jimson
       begin
         request = parse_request(content)
         if request.is_a?(Array)
-          raise Jimson::ServerError::InvalidRequest.new if request.empty?
+          raise Server::Error::InvalidRequest.new if request.empty?
           response = request.map { |req| handle_request(req) }
         else
           response = handle_request(request)
         end
-      rescue Jimson::ServerError::ParseError, Jimson::ServerError::InvalidRequest => e
+      rescue Server::Error::ParseError, Server::Error::InvalidRequest => e
         response = error_response(e)
-      rescue Jimson::ServerError::Generic => e
+      rescue Server::Error => e
         response = error_response(e, request)
-      rescue StandardError, Exception
-        response = error_response(Jimson::ServerError::InternalError.new)
+      rescue StandardError, Exception => e
+        response = error_response(Server::Error::InternalError.new(e))
       end
 
       response.compact! if response.is_a?(Array)
@@ -76,11 +77,11 @@ module Jimson
       response = nil
       begin
         if !validate_request(request)
-          response = error_response(Jimson::ServerError::InvalidRequest.new)
+          response = error_response(Server::Error::InvalidRequest.new)
         else
           response = create_response(request)
         end
-      rescue Jimson::ServerError::Generic => e
+      rescue Server::Error => e
         response = error_response(e, request)
       end
 
@@ -120,11 +121,11 @@ module Jimson
           result = @handler.send(request['method'], *params)
         end
       rescue NoMethodError
-        raise Jimson::ServerError::MethodNotFound.new 
+        raise Server::Error::MethodNotFound.new 
       rescue ArgumentError
-        raise Jimson::ServerError::InvalidParams.new
+        raise Server::Error::InvalidParams.new
       rescue
-        raise Jimson::ServerError::ApplicationError.new($!)
+        raise Server::Error::ApplicationError.new($!)
       end
 
       response = success_response(request, result)
@@ -162,7 +163,7 @@ module Jimson
     def parse_request(post)
       data = JSON.parse(post)
       rescue 
-        raise Jimson::ServerError::ParseError.new 
+        raise Server::Error::ParseError.new 
     end
 
   end

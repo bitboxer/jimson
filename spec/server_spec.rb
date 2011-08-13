@@ -1,7 +1,35 @@
 require 'spec_helper'
+require 'rack/test'
 
 module Jimson
     describe Server do
+      include Rack::Test::Methods
+
+      class TestHandler
+        def subtract(a, b = nil)
+          if a.is_a?(Hash)
+            return a['minuend'] - a['subtrahend']
+          else 
+            return a - b
+          end
+        end
+
+        def sum(a,b,c)
+          a + b + c
+        end
+
+        def notify_hello(*args)
+          # notification, doesn't do anything
+        end
+
+        def update(*args)
+          # notification, doesn't do anything
+        end
+
+        def get_data
+          ['hello', 5]
+        end
+      end
 
       INVALID_RESPONSE_EXPECTATION = {
                                         'jsonrpc' => '2.0',
@@ -11,6 +39,14 @@ module Jimson
                                                       },
                                         'id'      => nil
                                       }
+      def app
+        Server.new(TestHandler.new)
+      end
+
+      def post_json(hash)
+        post '/', hash.to_json, {'Content-Type' => 'application/json'}
+      end
+      
       before(:each) do
         @url = SPEC_URL
       end
@@ -24,7 +60,10 @@ module Jimson
                     'params'  => [24, 20],
                     'id'      => 1
                   }
-            resp = JSON.parse(RestClient.post(@url, req.to_json).body)
+            post_json(req)
+
+            last_response.should be_ok
+            resp = JSON.parse(last_response.body)
             resp.should == {
                              'jsonrpc' => '2.0',
                              'result'  => 4,
@@ -43,7 +82,10 @@ module Jimson
                     'params'  => {'subtrahend'=> 20, 'minuend' => 24},
                     'id'      => 1
                   }
-            resp = JSON.parse(RestClient.post(@url, req.to_json).body)
+            post_json(req)
+            
+            last_response.should be_ok
+            resp = JSON.parse(last_response.body)
             resp.should == {
                              'jsonrpc' => '2.0',
                              'result'  => 4,
@@ -61,8 +103,8 @@ module Jimson
                     'method'  => 'update',
                     'params'  => [1,2,3,4,5]
                   }
-            resp = RestClient.post(@url, req.to_json).body
-            resp.should be_empty
+            post_json(req)
+            last_response.body.should be_empty
           end
         end
       end
@@ -74,7 +116,9 @@ module Jimson
                   'method'  => 'foobar',
                   'id'      => 1
                 }
-          resp = JSON.parse(RestClient.post(@url, req.to_json).body)
+          post_json(req)
+
+          resp = JSON.parse(last_response.body)
           resp.should == {
                             'jsonrpc' => '2.0',
                             'error'   => {
@@ -94,7 +138,9 @@ module Jimson
                   'params'  => [1,2,3],
                   'id'      => 1
                 }
-          resp = JSON.parse(RestClient.post(@url, req.to_json).body)
+          post_json(req)
+
+          resp = JSON.parse(last_response.body)
           resp.should == {
                             'jsonrpc' => '2.0',
                             'error'   => {
@@ -114,7 +160,9 @@ module Jimson
                   'id'      => 1
                 }.to_json
           req += '}' # make the json invalid
-          resp = JSON.parse(RestClient.post(@url, req).body)
+          post '/', req, {'Content-type' => 'application/json'}
+
+          resp = JSON.parse(last_response.body)
           resp.should == {
                             'jsonrpc' => '2.0',
                             'error'   => {
@@ -132,24 +180,27 @@ module Jimson
             req = {
                     'jsonrpc' => '2.0',
                     'method'  => 1 # method as int is invalid
-                  }.to_json
-            resp = JSON.parse(RestClient.post(@url, req).body)
+                  }
+            post_json(req)
+            resp = JSON.parse(last_response.body)
             resp.should == INVALID_RESPONSE_EXPECTATION 
           end
         end
 
         context "when the request is an empty batch" do
           it "returns an error response" do
-            req = [].to_json
-            resp = JSON.parse(RestClient.post(@url, req).body)
+            req = []
+            post_json(req)
+            resp = JSON.parse(last_response.body)
             resp.should == INVALID_RESPONSE_EXPECTATION
           end
         end
 
         context "when the request is an invalid batch" do
           it "returns an error response" do
-            req = [1,2].to_json
-            resp = JSON.parse(RestClient.post(@url, req).body)
+            req = [1,2]
+            post_json(req)
+            resp = JSON.parse(last_response.body)
             resp.should == [INVALID_RESPONSE_EXPECTATION, INVALID_RESPONSE_EXPECTATION] 
           end
         end
@@ -165,8 +216,9 @@ module Jimson
                       {'foo' => 'boo'},
                       {'jsonrpc' => '2.0', 'method' => 'foo.get', 'params' => {'name' => 'myself'}, 'id' => '5'},
                       {'jsonrpc' => '2.0', 'method' => 'get_data', 'id' => '9'} 
-                   ].to_json
-            resp = JSON.parse(RestClient.post(@url, reqs).body)
+                   ]
+            post_json(reqs)
+            resp = JSON.parse(last_response.body)
             resp.should == [
                     {'jsonrpc' => '2.0', 'result' => 7, 'id' => '1'},
                     {'jsonrpc' => '2.0', 'result' => 19, 'id' => '2'},
@@ -191,8 +243,8 @@ module Jimson
                       'params'  => [1,2,3,4,5]
                     }
                   ]
-            resp = RestClient.post(@url, req.to_json).body
-            resp.should be_empty
+            post_json(req)
+            last_response.body.should be_empty
           end
         end
       end

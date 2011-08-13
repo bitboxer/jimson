@@ -1,6 +1,5 @@
 require 'rest-client'
-require 'jimson/server_error'
-require 'jimson/client_error'
+require 'jimson/client/error'
 require 'jimson/request'
 require 'jimson/response'
 
@@ -21,7 +20,11 @@ module Jimson
     def process_call(sym, args)
       resp = send_single_request(sym.to_s, args)
 
-      data = JSON.parse(resp) rescue raise Client::Error::InvalidJSON.new(resp)
+      begin
+        data = JSON.parse(resp)
+      rescue
+        raise Client::Error::InvalidJSON.new(resp)
+      end
 
       return process_single_response(data)
 
@@ -111,7 +114,11 @@ module Jimson
       batch = @batch.map(&:first) # get the requests 
       response = send_batch_request(batch)
 
-      responses = JSON.parse(response) rescue raise Client::Error::InvalidJSON.new(json)
+      begin
+        responses = JSON.parse(response)
+      rescue
+        raise Client::Error::InvalidJSON.new(json)
+      end
 
       process_batch_response(responses)
       @batch = []
