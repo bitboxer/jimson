@@ -1,3 +1,9 @@
+require 'blankslate'
+module Jimson
+  class Client < BlankSlate
+  end
+end
+
 require 'rest-client'
 require 'jimson/client/error'
 require 'jimson/request'
@@ -126,7 +132,7 @@ module Jimson
 
   end
 
-  class BatchClient
+  class BatchClient < BlankSlate
     
     def initialize(helper)
       @helper = helper
@@ -139,7 +145,8 @@ module Jimson
 
   end
 
-  class Client
+  class Client < BlankSlate
+    reveal :instance_variable_get
     
     def self.batch(client)
       helper = client.instance_variable_get(:@helper)
