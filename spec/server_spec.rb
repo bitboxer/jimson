@@ -132,6 +132,27 @@ module Jimson
         end
       end
 
+      describe "receiving a call for a method which exists but is not exposed" do
+        it "returns an error response" do
+          req = {
+                  'jsonrpc' => '2.0',
+                  'method'  => 'object_id',
+                  'id'      => 1
+                }
+          post_json(req)
+
+          resp = JSON.parse(last_response.body)
+          resp.should == {
+                            'jsonrpc' => '2.0',
+                            'error'   => {
+                                            'code' => -32601,
+                                            'message' => 'Method not found.'
+                                          },
+                            'id'      => 1
+                          }
+        end
+      end
+
       describe "receiving a call with the wrong number of params" do
         it "returns an error response" do
           req = {
@@ -252,11 +273,11 @@ module Jimson
       end
 
       describe "receiving a 'system.' request" do
-        context "when the request is 'heartbeat'" do
+        context "when the request is 'isAlive'" do
           it "returns response 'true'" do
             req = {
                     'jsonrpc' => '2.0',
-                    'method'  => 'system.heartbeat',
+                    'method'  => 'system.isAlive',
                     'params'  => [],
                     'id'      => 1
                   }
@@ -271,11 +292,11 @@ module Jimson
                            }
           end
         end
-        context "when the request is 'methods'" do
-          it "returns response with all methods on the handler as strings" do
+        context "when the request is 'listMethods'" do
+          it "returns response with all listMethods on the handler as strings" do
             req = {
                     'jsonrpc' => '2.0',
-                    'method'  => 'system.methods',
+                    'method'  => 'system.listMethods',
                     'params'  => [],
                     'id'      => 1
                   }

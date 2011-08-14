@@ -9,15 +9,17 @@ module Jimson
   class Server
     
     class System
+      extend Handler
+
       def initialize(handler)
         @handler = handler
       end
 
-      def methods
+      def listMethods
         @handler.class.jimson_exposed_methods
       end
 
-      def heartbeat 
+      def isAlive 
         true
       end
     end
@@ -161,7 +163,12 @@ module Jimson
         method.gsub!(sys_regex, '')
       end
 
-      raise Server::Error::MethodNotFound.new if !handler.respond_to?(method.to_sym)
+      method = method.to_sym
+
+      if !handler.class.jimson_exposed_methods.include?(method) \
+         || !handler.respond_to?(method.to_sym)
+        raise Server::Error::MethodNotFound.new
+      end
 
       if params.is_a?(Hash)
         return handler.send(method, params)
