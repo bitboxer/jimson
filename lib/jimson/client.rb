@@ -153,7 +153,11 @@ module Jimson
     end
 
     def method_missing(sym, *args, &block)
-      @helper.process_call(sym, args) 
+      self[sym, args]
+    end
+
+    def [](method, *args)
+      @helper.process_call(method, args.flatten) 
     end
 
   end
