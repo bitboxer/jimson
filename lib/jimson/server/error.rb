@@ -48,7 +48,7 @@ module Jimson
 
       class ApplicationError < Error
         def initialize(err)
-          super(-32099, "The application being served raised an error: #{err}")
+          super(-32099, "Application error: #{err}")
         end
       end
 

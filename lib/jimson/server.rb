@@ -2,11 +2,26 @@ require 'rack'
 require 'rack/request'
 require 'rack/response'
 require 'json'
+require 'jimson/handler'
 require 'jimson/server/error'
 
 module Jimson
   class Server
     
+    class System
+      def initialize(handler)
+        @handler = handler
+      end
+
+      def methods
+        @handler.class.jimson_exposed_methods
+      end
+
+      def heartbeat 
+        true
+      end
+    end
+
     JSON_RPC_VERSION = '2.0'
 
     attr_accessor :handler, :host, :port
@@ -113,20 +128,9 @@ module Jimson
     end
 
     def create_response(request)
+      method = request['method']
       params = request['params']
-      begin
-        if params.is_a?(Hash)
-          result = @handler.send(request['method'], params)
-        else
-          result = @handler.send(request['method'], *params)
-        end
-      rescue NoMethodError
-        raise Server::Error::MethodNotFound.new 
-      rescue ArgumentError
-        raise Server::Error::InvalidParams.new
-      rescue
-        raise Server::Error::ApplicationError.new($!)
-      end
+      result = dispatch_request(method, params)
 
       response = success_response(request, result)
 
@@ -135,7 +139,35 @@ module Jimson
       # that are within a batch request.
       response = nil if !request.has_key?('id')
 
-      response 
+      return response 
+
+      rescue Server::Error => e
+        raise e
+      rescue ArgumentError
+        raise Server::Error::InvalidParams.new
+      rescue Exception, StandardError => e
+        raise Server::Error::ApplicationError.new(e)
+    end
+
+    def dispatch_request(method, params)
+      # normally route requests to the user-suplied handler
+      handler = @handler
+
+      # switch to the System handler if a system method was called
+      sys_regex = /^system\./
+      if method =~ sys_regex
+        handler = System.new(@handler)
+        # remove the 'system.' prefix before from the method name
+        method.gsub!(sys_regex, '')
+      end
+
+      raise Server::Error::MethodNotFound.new if !handler.respond_to?(method.to_sym)
+
+      if params.is_a?(Hash)
+        return handler.send(method, params)
+      else
+        return handler.send(method, *params)
+      end
     end
 
     def error_response(error, request = nil)

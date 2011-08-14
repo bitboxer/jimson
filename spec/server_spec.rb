@@ -6,6 +6,8 @@ module Jimson
       include Rack::Test::Methods
 
       class TestHandler
+        extend Jimson::Handler
+
         def subtract(a, b = nil)
           if a.is_a?(Hash)
             return a['minuend'] - a['subtrahend']
@@ -249,5 +251,45 @@ module Jimson
         end
       end
 
+      describe "receiving a 'system.' request" do
+        context "when the request is 'heartbeat'" do
+          it "returns response 'true'" do
+            req = {
+                    'jsonrpc' => '2.0',
+                    'method'  => 'system.heartbeat',
+                    'params'  => [],
+                    'id'      => 1
+                  }
+            post_json(req)
+
+            last_response.should be_ok
+            resp = JSON.parse(last_response.body)
+            resp.should == {
+                             'jsonrpc' => '2.0',
+                             'result'  => true,
+                             'id'      => 1
+                           }
+          end
+        end
+        context "when the request is 'methods'" do
+          it "returns response with all methods on the handler as strings" do
+            req = {
+                    'jsonrpc' => '2.0',
+                    'method'  => 'system.methods',
+                    'params'  => [],
+                    'id'      => 1
+                  }
+            post_json(req)
+
+            last_response.should be_ok
+            resp = JSON.parse(last_response.body)
+            resp.should == {
+                             'jsonrpc' => '2.0',
+                             'result'  => ['subtract', 'sum', 'notify_hello', 'update', 'get_data'],
+                             'id'      => 1
+                           }
+          end
+        end
+      end
   end
 end
