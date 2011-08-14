@@ -101,5 +101,17 @@ module Jimson
       end
     end
 
+    describe "error handling" do
+      context "when an error occurs in the Jimson::Client code" do
+        it "tags the raised exception with Jimson::Client::Error" do
+          client_helper = ClientHelper.new(SPEC_URL)
+          ClientHelper.stub!(:new).and_return(client_helper)
+          client = Client.new(SPEC_URL)
+          client_helper.stub!(:send_single_request).and_raise "intentional error"
+          lambda { client.foo }.should raise_error(Jimson::Client::Error)
+        end
+      end
+    end
+
   end
 end
