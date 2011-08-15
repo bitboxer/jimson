@@ -306,7 +306,7 @@ module Jimson
             resp = JSON.parse(last_response.body)
             resp.should == {
                              'jsonrpc' => '2.0',
-                             'result'  => ['subtract', 'sum', 'notify_hello', 'update', 'get_data'],
+                             'result'  => ['subtract', 'sum', 'notify_hello', 'update', 'get_data'].sort,
                              'id'      => 1
                            }
           end

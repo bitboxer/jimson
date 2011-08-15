@@ -166,11 +166,13 @@ module Jimson
       method = method.to_sym
 
       if !handler.class.jimson_exposed_methods.include?(method) \
-         || !handler.respond_to?(method.to_sym)
+         || !handler.respond_to?(method)
         raise Server::Error::MethodNotFound.new
       end
 
-      if params.is_a?(Hash)
+      if params.nil?
+        return handler.send(method)
+      elsif params.is_a?(Hash)
         return handler.send(method, params)
       else
         return handler.send(method, *params)
