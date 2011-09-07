@@ -147,6 +147,8 @@ module Jimson
 
   class Client < BlankSlate
     reveal :instance_variable_get
+    reveal :inspect
+    reveal :to_s
     
     def self.batch(client)
       helper = client.instance_variable_get(:@helper)

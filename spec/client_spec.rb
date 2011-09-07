@@ -12,6 +12,16 @@ module Jimson
     after(:each) do
     end
 
+    describe "hidden methods" do
+      it "should reveal inspect" do
+        Client.new(SPEC_URL).inspect.should match /Jimson::Client/
+      end
+
+      it "should reveal to_s" do
+        Client.new(SPEC_URL).to_s.should match /Jimson::Client/
+      end
+    end
+
     describe "#[]" do
       before(:each) do
         expected = {
