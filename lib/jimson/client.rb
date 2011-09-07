@@ -1,6 +1,11 @@
+require 'blankslate'
+module Jimson
+  class Client < BlankSlate
+  end
+end
+
 require 'rest-client'
-require 'jimson/server_error'
-require 'jimson/client_error'
+require 'jimson/client/error'
 require 'jimson/request'
 require 'jimson/response'
 
@@ -24,10 +29,14 @@ module Jimson
       begin
         data = JSON.parse(resp)
       rescue
-        raise Jimson::ClientError::InvalidJSON.new(resp)
+        raise Client::Error::InvalidJSON.new(resp)
       end
 
       return process_single_response(data)
+
+      rescue Exception, StandardError => e
+        e.extend(Client::Error) unless e.is_a?(Client::Error)
+        raise e
     end
 
     def send_single_request(method, args)
@@ -39,20 +48,17 @@ module Jimson
                   }.to_json
       resp = RestClient.post(@url, post_data, :content_type => 'application/json')
       if resp.nil? || resp.body.nil? || resp.body.empty?
-        raise Jimson::ClientError::InvalidResponse.new
+        raise Client::Error::InvalidResponse.new
       end
 
       return resp.body
-
-      rescue Exception, StandardError
-        raise Jimson::ClientError::InternalError.new($!)
     end
 
     def send_batch_request(batch)
       post_data = batch.to_json
       resp = RestClient.post(@url, post_data, :content_type => 'application/json')
       if resp.nil? || resp.body.nil? || resp.body.empty?
-        raise Jimson::ClientError::InvalidResponse.new
+        raise Client::Error::InvalidResponse.new
       end
 
       return resp.body
@@ -61,29 +67,21 @@ module Jimson
     def process_batch_response(responses)
       responses.each do |resp|
         saved_response = @batch.map { |r| r[1] }.select { |r| r.id == resp['id'] }.first
-        raise Jimson::ClientError::InvalidResponse.new unless !!saved_response
+        raise Client::Error::InvalidResponse.new if saved_response.nil?
         saved_response.populate!(resp)
       end
     end
 
     def process_single_response(data)
-      raise Jimson::ClientError::InvalidResponse.new if !valid_response?(data)
+      raise Client::Error::InvalidResponse.new if !valid_response?(data)
 
       if !!data['error']
         code = data['error']['code']
-        if Jimson::ServerError::CODES.keys.include?(code)
-          raise Jimson::ServerError::CODES[code].new
-        else
-          raise Jimson::ClientError::UnknownServerError.new(code, data['error']['message'])
-        end
+        msg = data['error']['message']
+        raise Client::Error::ServerError.new(code, msg)
       end
 
       return data['result']
-
-      rescue Jimson::ClientError::Generic, Jimson::ServerError::Generic => e
-        raise e
-      rescue Exception, StandardError => e
-        raise Jimson::ClientError::InternalError.new(e)
     end
 
     def valid_response?(data)
@@ -113,7 +111,7 @@ module Jimson
 
     def push_batch_request(request)
       request.id = self.class.make_id
-      response = Jimson::Response.new(request.id)
+      response = Response.new(request.id)
       @batch << [request, response]
       return response
     end
@@ -125,7 +123,7 @@ module Jimson
       begin
         responses = JSON.parse(response)
       rescue
-        raise Jimson::ClientError::InvalidJSON.new(json)
+        raise Client::Error::InvalidJSON.new(json)
       end
 
       process_batch_response(responses)
@@ -134,7 +132,7 @@ module Jimson
 
   end
 
-  class BatchClient
+  class BatchClient < BlankSlate
     
     def initialize(helper)
       @helper = helper
@@ -147,7 +145,10 @@ module Jimson
 
   end
 
-  class Client
+  class Client < BlankSlate
+    reveal :instance_variable_get
+    reveal :inspect
+    reveal :to_s
     
     def self.batch(client)
       helper = client.instance_variable_get(:@helper)
@@ -161,7 +162,11 @@ module Jimson
     end
 
     def method_missing(sym, *args, &block)
-      @helper.process_call(sym, args) 
+      self[sym, args]
+    end
+
+    def [](method, *args)
+      @helper.process_call(method, args.flatten) 
     end
 
   end
