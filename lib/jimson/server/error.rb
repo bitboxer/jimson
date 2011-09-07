@@ -29,8 +29,8 @@ module Jimson
       end
 
       class MethodNotFound < Error
-        def initialize
-          super(-32601, 'Method not found.')
+        def initialize(method)
+          super(-32601, "Method '#{method}' not found.")
         end
       end
 

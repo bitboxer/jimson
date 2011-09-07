@@ -167,7 +167,7 @@ module Jimson
 
       if !handler.class.jimson_exposed_methods.include?(method) \
          || !handler.respond_to?(method)
-        raise Server::Error::MethodNotFound.new
+        raise Server::Error::MethodNotFound.new(method)
       end
 
       if params.nil?

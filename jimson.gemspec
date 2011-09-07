@@ -8,7 +8,7 @@ spec = Gem::Specification.new do |s|
   s.require_path = "lib"
   s.has_rdoc = false 
   #s.rdoc_options << '-m' << 'README.rdoc' << '-t' << 'Jimson'
-  s.extra_rdoc_files = ["README.rdoc"]
+  s.extra_rdoc_files = ["README.md"]
   s.add_dependency("blankslate", ">= 2.1.2.3")
   s.add_dependency("rest-client", ">= 1.6.3")
   s.add_dependency("json", ">= 1.5.1")
@@ -18,7 +18,7 @@ spec = Gem::Specification.new do |s|
     VERSION
     LICENSE.txt
     CHANGELOG.rdoc
-    README.rdoc
+    README.md
     Rakefile
   ] + Dir['lib/**/*.rb']
 

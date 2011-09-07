@@ -125,7 +125,7 @@ module Jimson
                             'jsonrpc' => '2.0',
                             'error'   => {
                                             'code' => -32601,
-                                            'message' => 'Method not found.'
+                                            'message' => "Method 'foobar' not found."
                                           },
                             'id'      => 1
                           }
@@ -146,7 +146,7 @@ module Jimson
                             'jsonrpc' => '2.0',
                             'error'   => {
                                             'code' => -32601,
-                                            'message' => 'Method not found.'
+                                            'message' => "Method 'object_id' not found."
                                           },
                             'id'      => 1
                           }
@@ -246,7 +246,7 @@ module Jimson
                     {'jsonrpc' => '2.0', 'result' => 7, 'id' => '1'},
                     {'jsonrpc' => '2.0', 'result' => 19, 'id' => '2'},
                     {'jsonrpc' => '2.0', 'error' => {'code' => -32600, 'message' => 'The JSON sent is not a valid Request object.'}, 'id' => nil},
-                    {'jsonrpc' => '2.0', 'error' => {'code' => -32601, 'message' => 'Method not found.'}, 'id' => '5'},
+                    {'jsonrpc' => '2.0', 'error' => {'code' => -32601, 'message' => "Method 'foo.get' not found."}, 'id' => '5'},
                     {'jsonrpc' => '2.0', 'result' => ['hello', 5], 'id' => '9'}
             ]
           end
