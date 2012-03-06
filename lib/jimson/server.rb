@@ -1,7 +1,7 @@
 require 'rack'
 require 'rack/request'
 require 'rack/response'
-require 'json'
+require 'multi_json'
 require 'jimson/handler'
 require 'jimson/server/error'
 
@@ -202,7 +202,7 @@ module Jimson
     end
 
     def parse_request(post)
-      data = JSON.parse(post)
+      data = MultiJson.decode(post)
       rescue 
         raise Server::Error::ParseError.new 
     end
