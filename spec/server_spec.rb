@@ -72,6 +72,24 @@ module Jimson
                              'id'      => 1
                            }
           end
+
+          it "handles bignums" do
+            req = {
+                    'jsonrpc' => '2.0',
+                    'method'  => 'subtract',
+                    'params'  => [24, 20],
+                    'id'      => 123456789_123456789_123456789
+                  }
+            post_json(req)
+
+            last_response.should be_ok
+            resp = MultiJson.decode(last_response.body)
+            resp.should == {
+                             'jsonrpc' => '2.0',
+                             'result'  => 4,
+                             'id'      => 123456789_123456789_123456789
+                           }
+          end
         end
       end
 

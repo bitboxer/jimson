@@ -111,7 +111,7 @@ module Jimson
                          'jsonrpc' => [String],
                          'method'  => [String], 
                          'params'  => [Hash, Array],
-                         'id'      => [String, Fixnum, NilClass]
+                         'id'      => [String, Fixnum, Bignum, NilClass]
                        }
       
       return false if !request.is_a?(Hash)
