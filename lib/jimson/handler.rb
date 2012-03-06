@@ -18,7 +18,7 @@ module Jimson
     def jimson_exposed_methods
       @jimson_exposed_methods ||= []
       @jimson_excluded_methods ||= []
-      (jimson_default_methods - @jimson_excluded_methods + @jimson_exposed_methods).sort.map(&:to_sym)
+      (jimson_default_methods - @jimson_excluded_methods + @jimson_exposed_methods).sort
     end
 
   end

@@ -163,7 +163,7 @@ module Jimson
         method.gsub!(sys_regex, '')
       end
 
-      method = method.to_sym
+      method = method.to_s
 
       if !handler.class.jimson_exposed_methods.include?(method) \
          || !handler.respond_to?(method)
