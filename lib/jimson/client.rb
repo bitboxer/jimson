@@ -1,11 +1,6 @@
 require 'blankslate'
-module Jimson
-  class Client < BlankSlate
-  end
-end
-
+require 'multi_json'
 require 'rest-client'
-require 'jimson/client/error'
 require 'jimson/request'
 require 'jimson/response'
 
@@ -27,7 +22,7 @@ module Jimson
       resp = send_single_request(sym.to_s, args)
 
       begin
-        data = JSON.parse(resp)
+        data = MultiJson.decode(resp)
       rescue
         raise Client::Error::InvalidJSON.new(resp)
       end
@@ -40,12 +35,12 @@ module Jimson
     end
 
     def send_single_request(method, args)
-      post_data = {
-                    'jsonrpc' => JSON_RPC_VERSION,
-                    'method'  => method,
-                    'params'  => args,
-                    'id'      => self.class.make_id
-                  }.to_json
+      post_data = MultiJson.encode({
+        'jsonrpc' => JSON_RPC_VERSION,
+        'method'  => method,
+        'params'  => args,
+        'id'      => self.class.make_id
+      })
       resp = RestClient.post(@url, post_data, :content_type => 'application/json')
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise Client::Error::InvalidResponse.new
@@ -55,7 +50,7 @@ module Jimson
     end
 
     def send_batch_request(batch)
-      post_data = batch.to_json
+      post_data = MultiJson.encode(batch)
       resp = RestClient.post(@url, post_data, :content_type => 'application/json')
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise Client::Error::InvalidResponse.new
@@ -121,7 +116,7 @@ module Jimson
       response = send_batch_request(batch)
 
       begin
-        responses = JSON.parse(response)
+        responses = MultiJson.decode(response)
       rescue
         raise Client::Error::InvalidJSON.new(json)
       end
@@ -171,3 +166,5 @@ module Jimson
 
   end
 end
+
+require 'jimson/client/error'

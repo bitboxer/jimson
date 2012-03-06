@@ -1,7 +1,7 @@
 require 'rack'
 require 'rack/request'
 require 'rack/response'
-require 'json'
+require 'multi_json'
 require 'jimson/handler'
 require 'jimson/server/error'
 
@@ -87,7 +87,7 @@ module Jimson
 
       return nil if response.nil? || (response.respond_to?(:empty?) && response.empty?)
 
-      response.to_json
+      MultiJson.encode(response)
     end
 
     def handle_request(request)
@@ -111,7 +111,7 @@ module Jimson
                          'jsonrpc' => [String],
                          'method'  => [String], 
                          'params'  => [Hash, Array],
-                         'id'      => [String, Fixnum, NilClass]
+                         'id'      => [String, Fixnum, Bignum, NilClass]
                        }
       
       return false if !request.is_a?(Hash)
@@ -163,7 +163,7 @@ module Jimson
         method.gsub!(sys_regex, '')
       end
 
-      method = method.to_sym
+      method = method.to_s
 
       if !handler.class.jimson_exposed_methods.include?(method) \
          || !handler.respond_to?(method)
@@ -202,7 +202,7 @@ module Jimson
     end
 
     def parse_request(post)
-      data = JSON.parse(post)
+      data = MultiJson.decode(post)
       rescue 
         raise Server::Error::ParseError.new 
     end

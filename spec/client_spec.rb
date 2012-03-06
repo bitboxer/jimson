@@ -24,13 +24,13 @@ module Jimson
 
     describe "#[]" do
       before(:each) do
-        expected = {
-                     'jsonrpc' => '2.0',
-                     'method'  => 'foo',
-                     'params'  => [1,2,3],
-                     'id'      => 1
-                   }.to_json
-        response = BOILERPLATE.merge({'result' => 42}).to_json
+        expected = MultiJson.encode({
+         'jsonrpc' => '2.0',
+         'method'  => 'foo',
+         'params'  => [1,2,3],
+         'id'      => 1
+        })
+        response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
         RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
         @resp_mock.should_receive(:body).at_least(:once).and_return(response)
         @client = Client.new(SPEC_URL)
@@ -51,15 +51,15 @@ module Jimson
     describe "sending a single request" do
       context "when using positional parameters" do
         before(:each) do
-          @expected = {
+          @expected = MultiJson.encode({
                        'jsonrpc' => '2.0',
                        'method'  => 'foo',
                        'params'  => [1,2,3],
                        'id'      => 1
-                     }.to_json
+          })
         end
         it "sends a valid JSON-RPC request and returns the result" do
-          response = BOILERPLATE.merge({'result' => 42}).to_json
+          response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
           RestClient.should_receive(:post).with(SPEC_URL, @expected, {:content_type => 'application/json'}).and_return(@resp_mock)
           @resp_mock.should_receive(:body).at_least(:once).and_return(response)
           client = Client.new(SPEC_URL)
@@ -70,19 +70,19 @@ module Jimson
 
     describe "sending a batch request" do
       it "sends a valid JSON-RPC batch request and puts the results in the response objects" do
-        batch = [
-            {"jsonrpc" => "2.0", "method" => "sum", "params" => [1,2,4], "id" => "1"},
-            {"jsonrpc" => "2.0", "method" => "subtract", "params" => [42,23], "id" => "2"},
-            {"jsonrpc" => "2.0", "method" => "foo_get", "params" => [{"name" => "myself"}], "id" => "5"},
-            {"jsonrpc" => "2.0", "method" => "get_data", "id" => "9"} 
-        ].to_json
+        batch = MultiJson.encode([
+          {"jsonrpc" => "2.0", "method" => "sum", "params" => [1,2,4], "id" => "1"},
+          {"jsonrpc" => "2.0", "method" => "subtract", "params" => [42,23], "id" => "2"},
+          {"jsonrpc" => "2.0", "method" => "foo_get", "params" => [{"name" => "myself"}], "id" => "5"},
+          {"jsonrpc" => "2.0", "method" => "get_data", "id" => "9"} 
+        ])
 
-        response = [
-            {"jsonrpc" => "2.0", "result" => 7, "id" => "1"},
-            {"jsonrpc" => "2.0", "result" => 19, "id" => "2"},
-            {"jsonrpc" => "2.0", "error" => {"code" => -32601, "message" => "Method not found."}, "id" => "5"},
-            {"jsonrpc" => "2.0", "result" => ["hello", 5], "id" => "9"}
-        ].to_json
+        response = MultiJson.encode([
+          {"jsonrpc" => "2.0", "result" => 7, "id" => "1"},
+          {"jsonrpc" => "2.0", "result" => 19, "id" => "2"},
+          {"jsonrpc" => "2.0", "error" => {"code" => -32601, "message" => "Method not found."}, "id" => "5"},
+          {"jsonrpc" => "2.0", "result" => ["hello", 5], "id" => "9"}
+        ])
 
         ClientHelper.stub!(:make_id).and_return('1', '2', '5', '9')
         RestClient.should_receive(:post).with(SPEC_URL, batch, {:content_type => 'application/json'}).and_return(@resp_mock)
