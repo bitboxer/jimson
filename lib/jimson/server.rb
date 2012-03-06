@@ -87,7 +87,7 @@ module Jimson
 
       return nil if response.nil? || (response.respond_to?(:empty?) && response.empty?)
 
-      response.to_json
+      MultiJson.encode(response)
     end
 
     def handle_request(request)

@@ -195,11 +195,11 @@ module Jimson
 
       describe "receiving invalid JSON" do
         it "returns an error response" do
-          req = {
-                  'jsonrpc' => '2.0',
-                  'method'  => 'foobar',
-                  'id'      => 1
-                }.to_json
+          req = MultiJson.encode({
+            'jsonrpc' => '2.0',
+            'method'  => 'foobar',
+            'id'      => 1
+          })
           req += '}' # make the json invalid
           post '/', req, {'Content-type' => 'application/json'}
 

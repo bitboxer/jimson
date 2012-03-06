@@ -18,7 +18,7 @@ module Jimson
     end
 
     def to_json(*a)
-      self.to_h.to_json(*a)
+      MultiJson.encode(self.to_h)
     end
 
   end
