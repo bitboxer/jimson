@@ -26,3 +26,4 @@ Jimson uses multi\_json, so you can load the JSON library of your choice in your
 
 For example, require the 'json' gem in your application:
     require 'json'
+
