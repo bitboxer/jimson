@@ -46,7 +46,7 @@ module Jimson
       end
 
       def post_json(hash)
-        post '/', hash.to_json, {'Content-Type' => 'application/json'}
+        post '/', MultiJson.encode(hash), {'Content-Type' => 'application/json'}
       end
       
       before(:each) do
