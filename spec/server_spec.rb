@@ -65,7 +65,7 @@ module Jimson
             post_json(req)
 
             last_response.should be_ok
-            resp = JSON.parse(last_response.body)
+            resp = MultiJson.decode(last_response.body)
             resp.should == {
                              'jsonrpc' => '2.0',
                              'result'  => 4,
@@ -105,7 +105,7 @@ module Jimson
             post_json(req)
             
             last_response.should be_ok
-            resp = JSON.parse(last_response.body)
+            resp = MultiJson.decode(last_response.body)
             resp.should == {
                              'jsonrpc' => '2.0',
                              'result'  => 4,
@@ -138,7 +138,7 @@ module Jimson
                 }
           post_json(req)
 
-          resp = JSON.parse(last_response.body)
+          resp = MultiJson.decode(last_response.body)
           resp.should == {
                             'jsonrpc' => '2.0',
                             'error'   => {
@@ -159,7 +159,7 @@ module Jimson
                 }
           post_json(req)
 
-          resp = JSON.parse(last_response.body)
+          resp = MultiJson.decode(last_response.body)
           resp.should == {
                             'jsonrpc' => '2.0',
                             'error'   => {
@@ -181,7 +181,7 @@ module Jimson
                 }
           post_json(req)
 
-          resp = JSON.parse(last_response.body)
+          resp = MultiJson.decode(last_response.body)
           resp.should == {
                             'jsonrpc' => '2.0',
                             'error'   => {
@@ -203,7 +203,7 @@ module Jimson
           req += '}' # make the json invalid
           post '/', req, {'Content-type' => 'application/json'}
 
-          resp = JSON.parse(last_response.body)
+          resp = MultiJson.decode(last_response.body)
           resp.should == {
                             'jsonrpc' => '2.0',
                             'error'   => {
@@ -223,7 +223,7 @@ module Jimson
                     'method'  => 1 # method as int is invalid
                   }
             post_json(req)
-            resp = JSON.parse(last_response.body)
+            resp = MultiJson.decode(last_response.body)
             resp.should == INVALID_RESPONSE_EXPECTATION 
           end
         end
@@ -232,7 +232,7 @@ module Jimson
           it "returns an error response" do
             req = []
             post_json(req)
-            resp = JSON.parse(last_response.body)
+            resp = MultiJson.decode(last_response.body)
             resp.should == INVALID_RESPONSE_EXPECTATION
           end
         end
@@ -241,7 +241,7 @@ module Jimson
           it "returns an error response" do
             req = [1,2]
             post_json(req)
-            resp = JSON.parse(last_response.body)
+            resp = MultiJson.decode(last_response.body)
             resp.should == [INVALID_RESPONSE_EXPECTATION, INVALID_RESPONSE_EXPECTATION] 
           end
         end
@@ -259,7 +259,7 @@ module Jimson
                       {'jsonrpc' => '2.0', 'method' => 'get_data', 'id' => '9'} 
                    ]
             post_json(reqs)
-            resp = JSON.parse(last_response.body)
+            resp = MultiJson.decode(last_response.body)
             resp.should == [
                     {'jsonrpc' => '2.0', 'result' => 7, 'id' => '1'},
                     {'jsonrpc' => '2.0', 'result' => 19, 'id' => '2'},
@@ -302,7 +302,7 @@ module Jimson
             post_json(req)
 
             last_response.should be_ok
-            resp = JSON.parse(last_response.body)
+            resp = MultiJson.decode(last_response.body)
             resp.should == {
                              'jsonrpc' => '2.0',
                              'result'  => true,
@@ -321,7 +321,7 @@ module Jimson
             post_json(req)
 
             last_response.should be_ok
-            resp = JSON.parse(last_response.body)
+            resp = MultiJson.decode(last_response.body)
             resp.should == {
                              'jsonrpc' => '2.0',
                              'result'  => ['subtract', 'sum', 'notify_hello', 'update', 'get_data'].sort,
