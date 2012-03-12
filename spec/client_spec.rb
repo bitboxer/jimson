@@ -65,6 +65,14 @@ module Jimson
           client = Client.new(SPEC_URL)
           client.foo(1,2,3).should == 42
         end
+
+        it "sends a valid JSON-RPC request with custom options" do
+          response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
+          RestClient.should_receive(:post).with(SPEC_URL, @expected, {:content_type => 'application/json', :timeout => 10000}).and_return(@resp_mock)
+          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+          client = Client.new(SPEC_URL, :timeout => 10000)
+          client.foo(1,2,3).should == 42
+        end
       end
     end
 
