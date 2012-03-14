@@ -26,7 +26,7 @@ module Jimson
 
     JSON_RPC_VERSION = '2.0'
 
-    attr_accessor :handler, :host, :port
+    attr_accessor :handler, :host, :port, :opts
 
     #
     # +handler+ is an instance of the class to expose as a JSON-RPC server
@@ -36,23 +36,24 @@ module Jimson
     # * :port - the port to listen on
     # * :server - the rack handler to use, e.g. 'webrick' or 'thin'
     #
+    # Remaining options are forwarded to the underlying Rack server.
+    #
     def initialize(handler, opts = {})
       @handler = handler
-      @host = opts[:host] || '0.0.0.0'
-      @port = opts[:port] || 8999
-      @server = opts[:server] || 'webrick'
+      @host = opts.delete(:host) || '0.0.0.0'
+      @port = opts.delete(:port) || 8999
+      @opts = opts
     end
 
     #
     # Starts the server so it can process requests
     #
     def start
-      Rack::Server.start(
-        :server => @server,
+      Rack::Server.start(opts.merge(
         :app    => self,
         :Host   => @host,
         :Port   => @port
-      )
+      ))
     end
 
     #
