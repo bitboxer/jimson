@@ -12,10 +12,12 @@ module Jimson
       rand(10**12)
     end
 
-    def initialize(url)
+    def initialize(url, opts={})
       @url = url
       URI.parse(@url) # for the sake of validating the url
       @batch = []
+      @opts = opts
+      @opts[:content_type] = 'application/json'
     end
 
     def process_call(sym, args)
@@ -41,7 +43,7 @@ module Jimson
         'params'  => args,
         'id'      => self.class.make_id
       })
-      resp = RestClient.post(@url, post_data, :content_type => 'application/json')
+      resp = RestClient.post(@url, post_data, @opts)
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise Client::Error::InvalidResponse.new
       end
@@ -51,7 +53,7 @@ module Jimson
 
     def send_batch_request(batch)
       post_data = MultiJson.encode(batch)
-      resp = RestClient.post(@url, post_data, :content_type => 'application/json')
+      resp = RestClient.post(@url, post_data, @opts)
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise Client::Error::InvalidResponse.new
       end
@@ -152,8 +154,8 @@ module Jimson
       helper.send_batch
     end
 
-    def initialize(url)
-      @helper = ClientHelper.new(url)
+    def initialize(url, opts={})
+      @helper = ClientHelper.new(url, opts)
     end
 
     def method_missing(sym, *args, &block)
