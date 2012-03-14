@@ -42,7 +42,7 @@ module Jimson
                                         'id'      => nil
                                       }
       def app
-        Server.new(TestHandler.new)
+        Server.new(TestHandler.new, :environment => "production")
       end
 
       def post_json(hash)
@@ -51,6 +51,10 @@ module Jimson
       
       before(:each) do
         @url = SPEC_URL
+      end
+
+      it "exposes the given options" do
+        app.opts.should == { :environment => "production" }
       end
 
       describe "receiving a request with positional parameters" do

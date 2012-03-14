@@ -1,3 +1,9 @@
+== 0.6.0 / 2012-03-14
+
+* Minor enhancements
+
+  * Add ability to pass options to Rack and RestClient
+
 == 0.5.0 / 2012-03-06
 
 * Major enhancements
