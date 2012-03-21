@@ -31,6 +31,10 @@ module Jimson
         def get_data
           ['hello', 5]
         end
+
+        def ugly_method
+          raise RuntimeError
+        end
       end
 
       INVALID_RESPONSE_EXPECTATION = {
@@ -197,6 +201,27 @@ module Jimson
         end
       end
 
+      describe "receiving a call for ugly method" do
+        it "returns only global error without stack trace" do
+          req = {
+                  'jsonrpc' => '2.0',
+                  'method'  => 'ugly_method',
+                  'id'      => 1
+                }
+          post_json(req)
+
+          resp = MultiJson.decode(last_response.body)
+          resp.should == {
+                            'jsonrpc' => '2.0',
+                            'error'   => {
+                                            'code' => -32099,
+                                            'message' => 'Server application error'
+                                          },
+                            'id'      => 1
+                          }
+        end
+      end
+
       describe "receiving invalid JSON" do
         it "returns an error response" do
           req = MultiJson.encode({
@@ -328,7 +353,7 @@ module Jimson
             resp = MultiJson.decode(last_response.body)
             resp.should == {
                              'jsonrpc' => '2.0',
-                             'result'  => ['subtract', 'sum', 'notify_hello', 'update', 'get_data'].sort,
+                             'result'  => ['subtract', 'sum', 'notify_hello', 'update', 'get_data', 'ugly_method'].sort,
                              'id'      => 1
                            }
           end

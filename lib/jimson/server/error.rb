@@ -48,7 +48,7 @@ module Jimson
 
       class ApplicationError < Error
         def initialize(err)
-          super(-32099, "Application error: #{err} #{err.backtrace.join("\n")}")
+          super(-32099, "Server application error")
         end
       end
 
