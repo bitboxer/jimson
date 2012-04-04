@@ -339,8 +339,8 @@ module Jimson
                            }
           end
         end
-        context "when the request is 'listMethods'" do
-          it "returns response with all listMethods on the handler as strings" do
+        context "when the request is 'system.listMethods'" do
+          it "returns response with all jimson_exposed_methods on the handler(s) as strings" do
             req = {
                     'jsonrpc' => '2.0',
                     'method'  => 'system.listMethods',
@@ -351,11 +351,10 @@ module Jimson
 
             last_response.should be_ok
             resp = MultiJson.decode(last_response.body)
-            resp.should == {
-                             'jsonrpc' => '2.0',
-                             'result'  => ["get_data", "notify_hello", "subtract", "sum", "ugly_method", "update", "system.isAlive", "system.listMethods"],
-                             'id'      => 1
-                           }
+            resp['jsonrpc'].should == '2.0'
+            resp['id'].should == 1
+            expected = ['get_data', 'notify_hello', 'subtract', 'sum', 'ugly_method', 'update', 'system.isAlive', 'system.listMethods']
+            (resp['result'] - expected).should == []
           end
         end
       end
