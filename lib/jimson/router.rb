@@ -4,7 +4,11 @@ module Jimson
   class Router
     extend Forwardable
 
-    def_delegator :@map, :handler_for_method
+    def_delegators :@map, :handler_for_method,
+                          :root,
+                          :namespace,
+                          :jimson_methods,
+                          :strip_method_namespace
 
     def initialize
       @map = Map.new

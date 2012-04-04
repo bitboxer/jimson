@@ -22,7 +22,7 @@ module Jimson
       # Define the handler for a namespace
       #
       def namespace(ns, handler)
-        @routes[ns] = handler 
+        @routes[ns.to_s] = handler 
       end
 
       #
@@ -31,6 +31,25 @@ module Jimson
       def handler_for_method(method)
         ns = (method.index('.') == nil ? '' : method.split('.').first)
         @routes[ns]
+      end
+
+      #
+      # Strip off the namespace part of a method and return the bare method name
+      #
+      def strip_method_namespace(method)
+        # Currently doesn't support nested namespaces, so just return the last part
+        method.split('.').last
+      end
+
+      #
+      # Return an array of all methods on handlers in the map, fully namespaced
+      #
+      def jimson_methods
+        arr = @routes.keys.map do |ns|
+          prefix = (ns == '' ? '' : "#{ns}.")
+          @routes[ns].class.jimson_exposed_methods.map { |method| prefix + method }
+        end
+        arr.flatten
       end
 
     end

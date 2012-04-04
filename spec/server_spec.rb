@@ -353,7 +353,7 @@ module Jimson
             resp = MultiJson.decode(last_response.body)
             resp.should == {
                              'jsonrpc' => '2.0',
-                             'result'  => ['subtract', 'sum', 'notify_hello', 'update', 'get_data', 'ugly_method'].sort,
+                             'result'  => ["get_data", "notify_hello", "subtract", "sum", "ugly_method", "update", "system.isAlive", "system.listMethods"],
                              'id'      => 1
                            }
           end
