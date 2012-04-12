@@ -37,6 +37,14 @@ module Jimson
         end
       end
 
+      class OtherHandler
+        extend Jimson::Handler
+
+        def multiply(a,b)
+          a * b
+        end
+      end
+
       INVALID_RESPONSE_EXPECTATION = {
                                         'jsonrpc' => '2.0',
                                         'error'   => {
@@ -45,8 +53,15 @@ module Jimson
                                                       },
                                         'id'      => nil
                                       }
-      def app
-        Server.new(TestHandler.new, :environment => "production")
+      let(:router) do
+        router = Router.new.draw do
+          root TestHandler.new
+          namespace 'other', OtherHandler.new
+        end
+      end
+
+      let(:app) do
+        Server.new(router, :environment => "production")
       end
 
       def post_json(hash)
@@ -353,7 +368,7 @@ module Jimson
             resp = MultiJson.decode(last_response.body)
             resp['jsonrpc'].should == '2.0'
             resp['id'].should == 1
-            expected = ['get_data', 'notify_hello', 'subtract', 'sum', 'ugly_method', 'update', 'system.isAlive', 'system.listMethods']
+            expected = ['get_data', 'notify_hello', 'subtract', 'sum', 'ugly_method', 'update', 'system.isAlive', 'system.listMethods', 'other.multiply']
             (resp['result'] - expected).should == []
           end
         end

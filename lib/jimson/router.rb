@@ -1,4 +1,5 @@
 require 'jimson/router/map'
+require 'forwardable'
 
 module Jimson
   class Router
@@ -16,6 +17,7 @@ module Jimson
 
     def draw(&block)
       @map.instance_eval(&block)
+      self
     end
 
   end

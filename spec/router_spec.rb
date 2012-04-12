@@ -5,6 +5,23 @@ module Jimson
 
     let(:router) { Router.new }
 
+    class RouterFooHandler
+      extend Jimson::Handler
+
+      def hi
+        'hi'
+      end
+    end
+
+    class RouterBarHandler
+      extend Jimson::Handler
+
+      def bye 
+        'bye'
+      end
+    end
+
+
     describe '#draw' do
       it 'takes a block with a DSL to set the root and namespaces' do
         router.draw do
@@ -14,6 +31,17 @@ module Jimson
 
         router.handler_for_method('hi').should == 'foo'
         router.handler_for_method('ns.hi').should == 'bar'
+      end
+    end
+
+    describe '#jimson_methods' do
+      it 'returns an array of namespaced method names from all registered handlers' do
+        router.draw do
+          root RouterFooHandler.new
+          namespace 'foo', RouterBarHandler.new
+        end
+
+        router.jimson_methods.should == ['hi', 'foo.bye']
       end
     end
 
