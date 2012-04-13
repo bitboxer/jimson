@@ -1,3 +1,13 @@
+== 0.7.0 / 2012-04-13
+
+* Major enhancements
+
+  * Add namespaced routing
+
+* Bug fixes
+
+  * Fix deprecation warning about RDoc task in Rakefile
+
 == 0.6.0 / 2012-03-14
 
 * Minor enhancements
