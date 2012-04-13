@@ -3,6 +3,7 @@ require 'rack/request'
 require 'rack/response'
 require 'multi_json'
 require 'jimson/handler'
+require 'jimson/router'
 require 'jimson/server/error'
 
 module Jimson
@@ -11,12 +12,12 @@ module Jimson
     class System
       extend Handler
 
-      def initialize(handler)
-        @handler = handler
+      def initialize(router)
+        @router = router
       end
 
       def listMethods
-        @handler.class.jimson_exposed_methods
+        @router.jimson_methods
       end
 
       def isAlive 
@@ -26,10 +27,10 @@ module Jimson
 
     JSON_RPC_VERSION = '2.0'
 
-    attr_accessor :handler, :host, :port, :opts
+    attr_accessor :router, :host, :port, :opts
 
     #
-    # +handler+ is an instance of the class to expose as a JSON-RPC server
+    # +router_or_handler+ is an instance of Jimson::Router or extends Jimson::Handler
     #
     # +opts+ may include:
     # * :host - the hostname or ip to bind to
@@ -38,8 +39,17 @@ module Jimson
     #
     # Remaining options are forwarded to the underlying Rack server.
     #
-    def initialize(handler, opts = {})
-      @handler = handler
+    def initialize(router_or_handler, opts = {})
+      if !router_or_handler.is_a?(Router)
+        # arg is a handler, wrap it in a Router
+        @router = Router.new
+        @router.root router_or_handler
+      else
+        # arg is a router
+        @router = router_or_handler
+      end
+      @router.namespace 'system', System.new(@router)
+
       @host = opts.delete(:host) || '0.0.0.0'
       @port = opts.delete(:port) || 8999
       @opts = opts
@@ -153,30 +163,22 @@ module Jimson
     end
 
     def dispatch_request(method, params)
-      # normally route requests to the user-suplied handler
-      handler = @handler
+      method_name = method.to_s
+      handler = @router.handler_for_method(method_name)
+      method_name = @router.strip_method_namespace(method_name)
 
-      # switch to the System handler if a system method was called
-      sys_regex = /^system\./
-      if method =~ sys_regex
-        handler = System.new(@handler)
-        # remove the 'system.' prefix before from the method name
-        method.gsub!(sys_regex, '')
-      end
-
-      method = method.to_s
-
-      if !handler.class.jimson_exposed_methods.include?(method) \
-         || !handler.respond_to?(method)
+      if handler.nil? \
+      || !handler.class.jimson_exposed_methods.include?(method_name) \
+      || !handler.respond_to?(method_name)
         raise Server::Error::MethodNotFound.new(method)
       end
 
       if params.nil?
-        return handler.send(method)
+        return handler.send(method_name)
       elsif params.is_a?(Hash)
-        return handler.send(method, params)
+        return handler.send(method_name, params)
       else
-        return handler.send(method, *params)
+        return handler.send(method_name, *params)
       end
     end
 

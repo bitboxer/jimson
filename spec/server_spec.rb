@@ -31,6 +31,18 @@ module Jimson
         def get_data
           ['hello', 5]
         end
+
+        def ugly_method
+          raise RuntimeError
+        end
+      end
+
+      class OtherHandler
+        extend Jimson::Handler
+
+        def multiply(a,b)
+          a * b
+        end
       end
 
       INVALID_RESPONSE_EXPECTATION = {
@@ -41,8 +53,15 @@ module Jimson
                                                       },
                                         'id'      => nil
                                       }
-      def app
-        Server.new(TestHandler.new, :environment => "production")
+      let(:router) do
+        router = Router.new.draw do
+          root TestHandler.new
+          namespace 'other', OtherHandler.new
+        end
+      end
+
+      let(:app) do
+        Server.new(router, :environment => "production")
       end
 
       def post_json(hash)
@@ -197,6 +216,27 @@ module Jimson
         end
       end
 
+      describe "receiving a call for ugly method" do
+        it "returns only global error without stack trace" do
+          req = {
+                  'jsonrpc' => '2.0',
+                  'method'  => 'ugly_method',
+                  'id'      => 1
+                }
+          post_json(req)
+
+          resp = MultiJson.decode(last_response.body)
+          resp.should == {
+                            'jsonrpc' => '2.0',
+                            'error'   => {
+                                            'code' => -32099,
+                                            'message' => 'Server application error'
+                                          },
+                            'id'      => 1
+                          }
+        end
+      end
+
       describe "receiving invalid JSON" do
         it "returns an error response" do
           req = MultiJson.encode({
@@ -314,8 +354,8 @@ module Jimson
                            }
           end
         end
-        context "when the request is 'listMethods'" do
-          it "returns response with all listMethods on the handler as strings" do
+        context "when the request is 'system.listMethods'" do
+          it "returns response with all jimson_exposed_methods on the handler(s) as strings" do
             req = {
                     'jsonrpc' => '2.0',
                     'method'  => 'system.listMethods',
@@ -326,11 +366,10 @@ module Jimson
 
             last_response.should be_ok
             resp = MultiJson.decode(last_response.body)
-            resp.should == {
-                             'jsonrpc' => '2.0',
-                             'result'  => ['subtract', 'sum', 'notify_hello', 'update', 'get_data'].sort,
-                             'id'      => 1
-                           }
+            resp['jsonrpc'].should == '2.0'
+            resp['id'].should == 1
+            expected = ['get_data', 'notify_hello', 'subtract', 'sum', 'ugly_method', 'update', 'system.isAlive', 'system.listMethods', 'other.multiply']
+            (resp['result'] - expected).should == []
           end
         end
       end
