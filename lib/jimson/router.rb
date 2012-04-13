@@ -16,7 +16,7 @@ module Jimson
     end
 
     def draw(&block)
-      @map.instance_eval(&block)
+      @map.instance_eval &block
       self
     end
 

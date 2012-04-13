@@ -23,14 +23,30 @@ module Jimson
 
 
     describe '#draw' do
-      it 'takes a block with a DSL to set the root and namespaces' do
-        router.draw do
-          root 'foo'
-          namespace 'ns', 'bar'
-        end
+      context 'when given non-nested namespaces' do
+        it 'takes a block with a DSL to set the root and namespaces' do
+          router.draw do
+            root 'foo'
+            namespace 'ns', 'bar'
+          end
 
-        router.handler_for_method('hi').should == 'foo'
-        router.handler_for_method('ns.hi').should == 'bar'
+          router.handler_for_method('hi').should == 'foo'
+          router.handler_for_method('ns.hi').should == 'bar'
+        end
+      end
+
+      context 'when given nested namespaces' do
+        it 'takes a block with a DSL to set the root and namespaces' do
+          router.draw do
+            root 'foo'
+            namespace 'ns1' do
+              namespace 'ns2', 'bar'
+            end
+          end
+
+          router.handler_for_method('hi').should == 'foo'
+          router.handler_for_method('ns1.ns2.hi').should == 'bar'
+        end
       end
     end
 

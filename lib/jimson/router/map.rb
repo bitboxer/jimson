@@ -21,23 +21,34 @@ module Jimson
       #
       # Define the handler for a namespace
       #
-      def namespace(ns, handler)
-        @routes[ns.to_s] = handler 
+      def namespace(ns, handler = nil, &block)
+        if !!handler
+          @routes[ns.to_s] = handler
+        else
+          # passed a block for nested namespacing
+          map = Jimson::Router::Map.new
+          @routes[ns.to_s] = map
+          map.instance_eval &block
+        end
       end
 
       #
       # Return the handler for a (possibly namespaced) method name
       #
       def handler_for_method(method)
-        ns = (method.index('.') == nil ? '' : method.split('.').first)
-        @routes[ns]
+        parts = method.split('.')
+        ns = (method.index('.') == nil ? '' : parts.first)
+        handler = @routes[ns]
+        if handler.is_a?(Jimson::Router::Map)
+          return handler.handler_for_method(parts[1..-1].join('.'))
+        end
+        handler
       end
 
       #
       # Strip off the namespace part of a method and return the bare method name
       #
       def strip_method_namespace(method)
-        # Currently doesn't support nested namespaces, so just return the last part
         method.split('.').last
       end
 
@@ -47,7 +58,12 @@ module Jimson
       def jimson_methods
         arr = @routes.keys.map do |ns|
           prefix = (ns == '' ? '' : "#{ns}.")
-          @routes[ns].class.jimson_exposed_methods.map { |method| prefix + method }
+          handler = @routes[ns]
+          if handler.is_a?(Jimson::Router::Map)
+            handler.jimson_methods
+          else
+            handler.class.jimson_exposed_methods.map { |method| prefix + method }
+          end
         end
         arr.flatten
       end
