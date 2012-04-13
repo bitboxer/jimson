@@ -59,7 +59,7 @@ module Jimson
           namespace 'foo', RouterBarHandler.new
         end
 
-        router.jimson_methods.should == ['hi', 'foo.bye']
+        router.jimson_methods.sort.should == ['hi', 'foo.bye'].sort
       end
     end
 
