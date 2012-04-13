@@ -40,11 +40,13 @@ module Jimson
           router.draw do
             root 'foo'
             namespace 'ns1' do
+              root 'blah'
               namespace 'ns2', 'bar'
             end
           end
 
           router.handler_for_method('hi').should == 'foo'
+          router.handler_for_method('ns1.hi').should == 'blah'
           router.handler_for_method('ns1.ns2.hi').should == 'bar'
         end
       end
