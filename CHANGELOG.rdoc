@@ -1,3 +1,9 @@
+== 0.7.1 / 2012-08-16
+
+* Bug fixes
+
+  * Fix handling of array params in client, which were erroneously being flattened
+
 == 0.7.0 / 2012-04-13
 
 * Major enhancements

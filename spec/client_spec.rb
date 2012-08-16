@@ -24,26 +24,36 @@ module Jimson
 
     describe "#[]" do
       before(:each) do
-        expected = MultiJson.encode({
-         'jsonrpc' => '2.0',
-         'method'  => 'foo',
-         'params'  => [1,2,3],
-         'id'      => 1
-        })
-        response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
-        RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
-        @resp_mock.should_receive(:body).at_least(:once).and_return(response)
         @client = Client.new(SPEC_URL)
       end
 
-      context "when using an array of args" do
+      context "when sending positional arguments" do
         it "sends a request with the correct method and args" do
-          @client['foo', [1,2,3]].should == 42
-        end
-      end
-      context "when using a splat for args" do
-        it "sends a request with the correct method and args" do
+          expected = MultiJson.encode({
+           'jsonrpc' => '2.0',
+           'method'  => 'foo',
+           'params'  => [1,2,3],
+           'id'      => 1
+          })
+          response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
+          RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
           @client['foo', 1, 2, 3].should == 42
+        end
+
+        context "when one of the args is an array" do
+          it "sends a request with the correct method and args" do
+            expected = MultiJson.encode({
+             'jsonrpc' => '2.0',
+             'method'  => 'foo',
+             'params'  => [[1,2],3],
+             'id'      => 1
+            })
+            response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
+            RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+            @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+            @client['foo', [1, 2], 3].should == 42
+          end
         end
       end
     end
@@ -72,6 +82,22 @@ module Jimson
           @resp_mock.should_receive(:body).at_least(:once).and_return(response)
           client = Client.new(SPEC_URL, :timeout => 10000)
           client.foo(1,2,3).should == 42
+        end
+      end
+
+      context "when one of the parameters is an array" do
+        it "sends a correct JSON-RPC request (array is preserved) and returns the result" do
+          expected = MultiJson.encode({
+            'jsonrpc' => '2.0',
+            'method'  => 'foo',
+            'params'  => [[1,2],3],
+            'id'      => 1
+          })
+          response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
+          RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+          client = Client.new(SPEC_URL)
+          client.foo([1,2],3).should == 42
         end
       end
     end
