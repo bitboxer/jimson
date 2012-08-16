@@ -20,6 +20,10 @@ module Jimson
           a + b + c
         end
 
+        def car(array)
+          array.first
+        end
+
         def notify_hello(*args)
           # notification, doesn't do anything
         end
@@ -92,6 +96,24 @@ module Jimson
             resp.should == {
                              'jsonrpc' => '2.0',
                              'result'  => 4,
+                             'id'      => 1
+                           }
+          end
+
+          it "handles an array in the parameters" do
+            req = {
+                    'jsonrpc' => '2.0',
+                    'method'  => 'car',
+                    'params'  => [['a', 'b']],
+                    'id'      => 1
+                  }
+            post_json(req)
+
+            last_response.should be_ok
+            resp = MultiJson.decode(last_response.body)
+            resp.should == {
+                             'jsonrpc' => '2.0',
+                             'result'  => 'a',
                              'id'      => 1
                            }
           end
@@ -368,7 +390,7 @@ module Jimson
             resp = MultiJson.decode(last_response.body)
             resp['jsonrpc'].should == '2.0'
             resp['id'].should == 1
-            expected = ['get_data', 'notify_hello', 'subtract', 'sum', 'ugly_method', 'update', 'system.isAlive', 'system.listMethods', 'other.multiply']
+            expected = ['get_data', 'notify_hello', 'subtract', 'sum', 'car', 'ugly_method', 'update', 'system.isAlive', 'system.listMethods', 'other.multiply']
             (resp['result'] - expected).should == []
           end
         end
