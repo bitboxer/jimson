@@ -156,7 +156,7 @@ module Jimson
       helper.send_batch
     end
 
-    def initialize(url, opts={}, namespace = nil)
+    def initialize(url, opts = {}, namespace = nil)
       @url, @opts, @namespace = url, opts, namespace
       @helper = ClientHelper.new(url, opts, namespace)
     end
@@ -168,8 +168,8 @@ module Jimson
     def [](method, *args)
       if method.is_a?(Symbol)
         # namespace requested
-        new_ns = @namespace.nil? ? "#{method}." : "#{new_ns}.#{method}."
-        return self.class.new(@url, @opts, new_ns)
+        new_ns = @namespace.nil? ? "#{method}." : "#@namespace#{method}."
+        return Client.new(@url, @opts, new_ns)
       end
       @helper.process_call(method, args) 
     end
