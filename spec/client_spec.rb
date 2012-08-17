@@ -27,6 +27,36 @@ module Jimson
         @client = Client.new(SPEC_URL)
       end
 
+      context "when using a symbol to specify a namespace" do
+        it "sends the method prefixed with the namespace in the request" do
+          expected = MultiJson.encode({
+           'jsonrpc' => '2.0',
+           'method'  => 'foo.sum',
+           'params'  => [1,2,3],
+           'id'      => 1
+          })
+          response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
+          RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+          @client[:foo].sum(1, 2, 3).should == 42
+        end
+
+        context "when the namespace is nested" do
+          it "sends the method prefixed with the full namespace in the request" do
+            expected = MultiJson.encode({
+             'jsonrpc' => '2.0',
+             'method'  => 'foo.bar.sum',
+             'params'  => [1,2,3],
+             'id'      => 1
+            })
+            response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
+            RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+            @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+            @client[:foo][:bar].sum(1, 2, 3).should == 42
+          end
+        end
+      end
+
       context "when sending positional arguments" do
         it "sends a request with the correct method and args" do
           expected = MultiJson.encode({

@@ -21,33 +21,41 @@ module Jimson
       end
     end
 
+    class RouterBazHandler
+      extend Jimson::Handler
+
+      def meh 
+        'mehkayla'
+      end
+    end
+
 
     describe '#draw' do
       context 'when given non-nested namespaces' do
         it 'takes a block with a DSL to set the root and namespaces' do
           router.draw do
-            root 'foo'
-            namespace 'ns', 'bar'
+            root RouterFooHandler
+            namespace 'ns', RouterBarHandler
           end
 
-          router.handler_for_method('hi').should == 'foo'
-          router.handler_for_method('ns.hi').should == 'bar'
+          router.handler_for_method('hi').should be_a(RouterFooHandler)
+          router.handler_for_method('ns.hi').should be_a(RouterBarHandler)
         end
       end
 
       context 'when given nested namespaces' do
         it 'takes a block with a DSL to set the root and namespaces' do
           router.draw do
-            root 'foo'
+            root RouterFooHandler
             namespace 'ns1' do
-              root 'blah'
-              namespace 'ns2', 'bar'
+              root RouterBazHandler
+              namespace 'ns2', RouterBarHandler
             end
           end
 
-          router.handler_for_method('hi').should == 'foo'
-          router.handler_for_method('ns1.hi').should == 'blah'
-          router.handler_for_method('ns1.ns2.hi').should == 'bar'
+          router.handler_for_method('hi').should be_a(RouterFooHandler)
+          router.handler_for_method('ns1.hi').should be_a(RouterBazHandler)
+          router.handler_for_method('ns1.ns2.hi').should be_a(RouterBarHandler)
         end
       end
     end
@@ -55,11 +63,11 @@ module Jimson
     describe '#jimson_methods' do
       it 'returns an array of namespaced method names from all registered handlers' do
         router.draw do
-          root RouterFooHandler.new
-          namespace 'foo', RouterBarHandler.new
+          root RouterFooHandler
+          namespace 'foo', RouterBarHandler
         end
 
-        router.jimson_methods.should == ['hi', 'foo.bye']
+        router.jimson_methods.sort.should == ['hi', 'foo.bye'].sort
       end
     end
 
