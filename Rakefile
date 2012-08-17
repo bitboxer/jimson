@@ -14,11 +14,7 @@ end
 
 task :default => :rspec
 
-begin
-  require 'rdoc/task'
-rescue LoadError
-  require 'rake/rdoctask'
-end
+require 'rdoc/task'
 
 Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""

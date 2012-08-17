@@ -15,6 +15,7 @@ module Jimson
       # Set the root handler, i.e. the handler used for a bare method like 'foo'
       #
       def root(handler)
+        handler = handler.new if handler.is_a?(Class)
         @routes[''] = handler
       end
 
@@ -23,6 +24,7 @@ module Jimson
       #
       def namespace(ns, handler = nil, &block)
         if !!handler
+          handler = handler.new if handler.is_a?(Class)
           @routes[ns.to_s] = handler
         else
           # passed a block for nested namespacing

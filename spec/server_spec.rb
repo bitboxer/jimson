@@ -395,5 +395,33 @@ module Jimson
           end
         end
       end
+
+      describe ".with_routes" do
+        it "creates a server with a router by passing the block to Router#draw" do
+          app = Server.with_routes do
+            root TestHandler.new
+            namespace 'foo', OtherHandler.new
+          end
+
+          # have to make a new Rack::Test browser since this server is different than the normal one
+          browser = Rack::Test::Session.new(Rack::MockSession.new(app))
+
+          req = {
+                  'jsonrpc' => '2.0',
+                  'method'  => 'foo.multiply',
+                  'params'  => [2, 3],
+                  'id'      => 1
+                }
+          browser.post '/', MultiJson.encode(req), {'Content-Type' => 'application/json'}
+
+          browser.last_response.should be_ok
+          resp = MultiJson.decode(browser.last_response.body)
+          resp.should == {
+                           'jsonrpc' => '2.0',
+                           'result'  => 6,
+                           'id'      => 1
+                         }
+        end
+      end
   end
 end

@@ -30,6 +30,15 @@ module Jimson
     attr_accessor :router, :host, :port, :opts
 
     #
+    # Create a Server with routes defined
+    #
+    def self.with_routes(&block)
+      router = Router.new
+      router.send(:draw, &block)
+      self.new(router)
+    end
+
+    #
     # +router_or_handler+ is an instance of Jimson::Router or extends Jimson::Handler
     #
     # +opts+ may include:
