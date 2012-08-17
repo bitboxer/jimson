@@ -12,11 +12,12 @@ module Jimson
       rand(10**12)
     end
 
-    def initialize(url, opts={})
+    def initialize(url, opts = {}, namespace = nil)
       @url = url
       URI.parse(@url) # for the sake of validating the url
       @batch = []
       @opts = opts
+      @namespace = namespace
       @opts[:content_type] = 'application/json'
     end
 
@@ -37,9 +38,10 @@ module Jimson
     end
 
     def send_single_request(method, args)
+      namespaced_method = @namespace.nil? ? method : "#@namespace#{method}"
       post_data = MultiJson.encode({
         'jsonrpc' => JSON_RPC_VERSION,
-        'method'  => method,
+        'method'  => namespaced_method,
         'params'  => args,
         'id'      => self.class.make_id
       })
@@ -154,8 +156,9 @@ module Jimson
       helper.send_batch
     end
 
-    def initialize(url, opts={})
-      @helper = ClientHelper.new(url, opts)
+    def initialize(url, opts={}, namespace = nil)
+      @url, @opts, @namespace = url, opts, namespace
+      @helper = ClientHelper.new(url, opts, namespace)
     end
 
     def method_missing(sym, *args, &block)
@@ -163,6 +166,11 @@ module Jimson
     end
 
     def [](method, *args)
+      if method.is_a?(Symbol)
+        # namespace requested
+        new_ns = @namespace.nil? ? "#{method}." : "#{new_ns}.#{method}."
+        return self.class.new(@url, @opts, new_ns)
+      end
       @helper.process_call(method, args) 
     end
 
