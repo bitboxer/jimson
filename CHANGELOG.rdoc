@@ -1,3 +1,9 @@
+== 0.9.0 / 2012-08-22
+
+* Minor enhancements
+
+  * Add show_errors option to server, which will cause application errors to include the error name and the first line of the backtrace
+
 == 0.8.0 / 2012-08-17
 
 * Major enhancements
