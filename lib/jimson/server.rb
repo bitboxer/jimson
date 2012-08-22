@@ -61,6 +61,7 @@ module Jimson
 
       @host = opts.delete(:host) || '0.0.0.0'
       @port = opts.delete(:port) || 8999
+      @show_errors = opts.delete(:show_errors) || false 
       @opts = opts
     end
 
@@ -168,7 +169,7 @@ module Jimson
       rescue ArgumentError
         raise Server::Error::InvalidParams.new
       rescue Exception, StandardError => e
-        raise Server::Error::ApplicationError.new(e)
+        raise Server::Error::ApplicationError.new(e, @show_errors)
     end
 
     def dispatch_request(method, params)
