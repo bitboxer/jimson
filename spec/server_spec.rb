@@ -239,23 +239,51 @@ module Jimson
       end
 
       describe "receiving a call for ugly method" do
-        it "returns only global error without stack trace" do
-          req = {
-                  'jsonrpc' => '2.0',
-                  'method'  => 'ugly_method',
-                  'id'      => 1
-                }
-          post_json(req)
+        context "by default" do
+          it "returns only global error without stack trace" do
+            req = {
+                    'jsonrpc' => '2.0',
+                    'method'  => 'ugly_method',
+                    'id'      => 1
+                  }
+            post_json(req)
 
-          resp = MultiJson.decode(last_response.body)
-          resp.should == {
-                            'jsonrpc' => '2.0',
-                            'error'   => {
-                                            'code' => -32099,
-                                            'message' => 'Server application error'
-                                          },
-                            'id'      => 1
-                          }
+            resp = MultiJson.decode(last_response.body)
+            resp.should == {
+                              'jsonrpc' => '2.0',
+                              'error'   => {
+                                              'code' => -32099,
+                                              'message' => 'Server application error'
+                                            },
+                              'id'      => 1
+                            }
+          end
+        end
+
+        context "with 'show_errors' enabled" do
+          it "returns an error name and first line of the stack trace" do
+            req = {
+                    'jsonrpc' => '2.0',
+                    'method'  => 'ugly_method',
+                    'id'      => 1
+                  }
+
+            app = Server.new(router, :environment => "production", :show_errors => true)
+
+            # have to make a new Rack::Test browser since this server is different than the normal one
+            browser = Rack::Test::Session.new(Rack::MockSession.new(app))
+            browser.post '/', MultiJson.encode(req), {'Content-Type' => 'application/json'}
+
+            resp = MultiJson.decode(browser.last_response.body)
+            resp.should == {
+                              'jsonrpc' => '2.0',
+                              'error'   => {
+                                              'code' => -32099,
+                                              'message' => "Server application error: RuntimeError at /home/chris/repos/jimson/spec/server_spec.rb:40:in `ugly_method'"
+                                            },
+                              'id'      => 1
+                            }
+          end
         end
       end
 
