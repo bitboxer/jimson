@@ -450,6 +450,17 @@ module Jimson
                            'id'      => 1
                          }
         end
+
+        context "when opts are given" do
+          it "passes the opts to the new server" do
+            app = Server.with_routes(:show_errors => true) do
+              root TestHandler.new
+              namespace 'foo', OtherHandler.new
+            end
+
+            app.show_errors.should be_true
+          end
+        end
       end
   end
 end

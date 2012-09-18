@@ -27,15 +27,15 @@ module Jimson
 
     JSON_RPC_VERSION = '2.0'
 
-    attr_accessor :router, :host, :port, :opts
+    attr_accessor :router, :host, :port, :show_errors, :opts
 
     #
     # Create a Server with routes defined
     #
-    def self.with_routes(&block)
+    def self.with_routes(opts = {}, &block)
       router = Router.new
       router.send(:draw, &block)
-      self.new(router)
+      self.new(router, opts)
     end
 
     #
@@ -45,6 +45,7 @@ module Jimson
     # * :host - the hostname or ip to bind to
     # * :port - the port to listen on
     # * :server - the rack handler to use, e.g. 'webrick' or 'thin'
+    # * :show_errors - true or false, send backtraces in error responses?
     #
     # Remaining options are forwarded to the underlying Rack server.
     #
