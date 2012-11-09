@@ -47,7 +47,7 @@ module Jimson
       })
       resp = RestClient.post(@url, post_data, @opts)
       if resp.nil? || resp.body.nil? || resp.body.empty?
-        raise Client::Error::InvalidResponse.new
+        raise Client::Error::InvalidResponse.new(resp)
       end
 
       return resp.body
@@ -57,7 +57,7 @@ module Jimson
       post_data = MultiJson.encode(batch)
       resp = RestClient.post(@url, post_data, @opts)
       if resp.nil? || resp.body.nil? || resp.body.empty?
-        raise Client::Error::InvalidResponse.new
+        raise Client::Error::InvalidResponse.new(resp)
       end
 
       return resp.body
@@ -72,7 +72,7 @@ module Jimson
     end
 
     def process_single_response(data)
-      raise Client::Error::InvalidResponse.new if !valid_response?(data)
+      raise Client::Error::InvalidResponse.new(data) if !valid_response?(data)
 
       if !!data['error']
         code = data['error']['code']
