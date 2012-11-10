@@ -3,7 +3,7 @@ module Jimson
     module Error
       class InvalidResponse < StandardError
         def initialize(response = nil)
-          super('Invalid or empty response from server:\n#{response.inspect}')
+          super("Invalid or empty response from server:\n#{response.inspect}")
         end
       end
 
