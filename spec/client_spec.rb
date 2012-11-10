@@ -130,6 +130,38 @@ module Jimson
           client.foo([1,2],3).should == 42
         end
       end
+      
+      context "when one of the parameters is a hash" do
+        it "sends a correct JSON-RPC request (array is preserved with hash) and returns the results" do
+          expected = MultiJson.encode({
+            'jsonrpc' => '2.0',
+            'method'  => 'foo',
+            'params'  => [1,{'bar' => 'baz'},3],
+            'id'      => 1
+          })
+          response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
+          RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+          client = Client.new(SPEC_URL)
+          client.foo(1, {'bar' => 'baz'}, 3).should == 42
+        end
+      end
+      
+      context "when using named parameters" do
+        it "sends a correct JSON-RPC request (named parameters are preserved) and returns the result" do
+          expected = MultiJson.encode({
+            'jsonrpc' => '2.0',
+            'method'  => 'foo',
+            'params'  => {'bar' => 'baz'},
+            'id'      => 1 
+          })
+          response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
+          RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+          client = Client.new(SPEC_URL)
+          client.foo({'bar' => 'baz'}).should == 42
+        end
+      end
     end
 
     describe "sending a batch request" do
