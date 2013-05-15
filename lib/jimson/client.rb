@@ -12,12 +12,13 @@ module Jimson
       rand(10**12)
     end
 
-    def initialize(url, opts = {}, namespace = nil)
+    def initialize(url, opts = {}, namespace = nil, positional = true)
       @url = url
       URI.parse(@url) # for the sake of validating the url
       @batch = []
       @opts = opts
       @namespace = namespace
+      @positional = positional
       @opts[:content_type] = 'application/json'
     end
 
@@ -115,6 +116,10 @@ module Jimson
       return response
     end
 
+    def formated_params(args)
+      @positional && args || args[0]
+    end
+
     def send_batch
       batch = @batch.map(&:first) # get the requests 
       response = send_batch_request(batch)
@@ -138,7 +143,7 @@ module Jimson
     end
 
     def method_missing(sym, *args, &block)
-      request = Jimson::Request.new(sym.to_s, args)
+      request = Jimson::Request.new(sym.to_s, @helper.formated_params(args))
       @helper.push_batch_request(request) 
     end
 
@@ -156,13 +161,13 @@ module Jimson
       helper.send_batch
     end
 
-    def initialize(url, opts = {}, namespace = nil)
+    def initialize(url, opts = {}, namespace = nil, positional = true)
       @url, @opts, @namespace = url, opts, namespace
-      @helper = ClientHelper.new(url, opts, namespace)
+      @helper = ClientHelper.new(url, opts, namespace, positional)
     end
 
     def method_missing(sym, *args, &block)
-      @helper.process_call(sym, args) 
+      @helper.process_call(sym, @helper.formated_params(args))
     end
 
     def [](method, *args)
