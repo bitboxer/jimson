@@ -1,6 +1,6 @@
 spec = Gem::Specification.new do |s|
   s.name = "jimson-temp"
-  s.version = "0.9.3"
+  s.version = "0.9.4"
   s.author = "Chris Kite"
   s.homepage = "https://github.com/mindeavor/jimson.git"
   s.platform = Gem::Platform::RUBY
@@ -9,10 +9,10 @@ spec = Gem::Specification.new do |s|
   s.has_rdoc = false
   #s.rdoc_options << '-m' << 'README.rdoc' << '-t' << 'Jimson'
   s.extra_rdoc_files = ["README.md"]
-  s.add_dependency("blankslate", "~> 3.1.2")
-  s.add_dependency("rest-client", "~> 1.6.7")
-  s.add_dependency("multi_json", "~> 1.7.6")
-  s.add_dependency("rack", "~> 1.4.5")
+  s.add_dependency("blankslate", ">= 3.1.2")
+  s.add_dependency("rest-client", ">= 1.6.7")
+  s.add_dependency("multi_json", ">= 1.7.6")
+  s.add_dependency("rack", ">= 1.4.5")
 
   s.files = %w[
     VERSION
