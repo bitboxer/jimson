@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    jimson (0.9.1)
+    jimson-temp (0.9.2)
       blankslate (~> 3.1.2)
       multi_json (~> 1.7.6)
       rack (~> 1.4.5)
@@ -39,7 +39,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  jimson!
+  jimson-temp!
   rack-test
   rake
   rcov

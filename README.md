@@ -3,15 +3,15 @@
 ![next build status](https://secure.travis-ci.org/chriskite/jimson.png?branch=next)
 
 ## Client: Quick Start
-    require 'jimson'
+    require 'jimson-temp'
     client = Jimson::Client.new("http://www.example.com:8999") # the URL for the JSON-RPC 2.0 server to connect to
     result = client.sum(1,2) # call the 'sum' method on the RPC server and save the result '3'
 
 ## Server: Quick Start
-    require 'jimson'
+    require 'jimson-temp'
 
     class MyHandler
-      extend Jimson::Handler 
+      extend Jimson::Handler
 
       def sum(a,b)
         a + b

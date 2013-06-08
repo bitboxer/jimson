@@ -1,8 +1,8 @@
 spec = Gem::Specification.new do |s|
-  s.name = "jimson"
-  s.version = "0.9.1"
+  s.name = "jimson-temp"
+  s.version = "0.9.2"
   s.author = "Chris Kite"
-  s.homepage = "http://www.github.com/chriskite/jimson"
+  s.homepage = "https://github.com/mindeavor/jimson.git"
   s.platform = Gem::Platform::RUBY
   s.summary = "JSON-RPC 2.0 client and server"
   s.require_path = "lib"
