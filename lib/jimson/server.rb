@@ -2,13 +2,14 @@ require 'rack'
 require 'rack/request'
 require 'rack/response'
 require 'multi_json'
+require 'logger'
 require 'jimson/handler'
 require 'jimson/router'
 require 'jimson/server/error'
 
 module Jimson
   class Server
-    
+
     class System
       extend Handler
 
@@ -20,14 +21,14 @@ module Jimson
         @router.jimson_methods
       end
 
-      def isAlive 
+      def isAlive
         true
       end
     end
 
     JSON_RPC_VERSION = '2.0'
 
-    attr_accessor :router, :host, :port, :show_errors, :opts
+    attr_accessor :router, :host, :port, :logger, :show_errors, :opts
 
     #
     # Create a Server with routes defined
@@ -45,6 +46,7 @@ module Jimson
     # * :host - the hostname or ip to bind to
     # * :port - the port to listen on
     # * :server - the rack handler to use, e.g. 'webrick' or 'thin'
+    # * :logger - the logger to use
     # * :show_errors - true or false, send backtraces in error responses?
     #
     # Remaining options are forwarded to the underlying Rack server.
@@ -62,7 +64,8 @@ module Jimson
 
       @host = opts.delete(:host) || '0.0.0.0'
       @port = opts.delete(:port) || 8999
-      @show_errors = opts.delete(:show_errors) || false 
+      @logger = opts.delete(:logger) || ::Logger.new(STDOUT)
+      @show_errors = opts.delete(:show_errors) || false
       @opts = opts
     end
 
@@ -84,8 +87,11 @@ module Jimson
       req = Rack::Request.new(env)
       resp = Rack::Response.new
       return resp.finish if !req.post?
+
+      began_at = Time.now
+      @logger.log(Logger::INFO, "Started at #{began_at}")
       resp.write process(req.body.read)
-      resp.finish
+      resp.finish { @logger.log(Logger::INFO, "Finished (#{Time.now - began_at})") }
     end
 
     def process(content)
@@ -131,11 +137,11 @@ module Jimson
       required_keys = %w(jsonrpc method)
       required_types = {
                          'jsonrpc' => [String],
-                         'method'  => [String], 
+                         'method'  => [String],
                          'params'  => [Hash, Array],
                          'id'      => [String, Fixnum, Bignum, NilClass]
                        }
-      
+
       return false if !request.is_a?(Hash)
 
       required_keys.each do |key|
@@ -147,23 +153,26 @@ module Jimson
       end
 
       return false if request['jsonrpc'] != JSON_RPC_VERSION
-      
+
       true
     end
 
     def create_response(request)
       method = request['method']
       params = request['params']
+
+      @logger.log(Logger::INFO, "Started #{method} with #{params} for #{request['id']}")
+
       result = dispatch_request(method, params)
 
       response = success_response(request, result)
 
       # A Notification is a Request object without an "id" member.
-      # The Server MUST NOT reply to a Notification, including those 
+      # The Server MUST NOT reply to a Notification, including those
       # that are within a batch request.
       response = nil if !request.has_key?('id')
 
-      return response 
+      return response
 
       rescue Server::Error => e
         raise e
@@ -177,6 +186,9 @@ module Jimson
       method_name = method.to_s
       handler = @router.handler_for_method(method_name)
       method_name = @router.strip_method_namespace(method_name)
+
+      @logger.log(Logger::INFO, "Processing by #{handler.class.to_s}##{method_name}")
+      @logger.log(Logger::INFO, "  Parameters:#{params.inspect}")
 
       if handler.nil? \
       || !handler.class.jimson_exposed_methods.include?(method_name) \
@@ -199,27 +211,30 @@ module Jimson
                'error'   => error.to_h,
              }
       if !!request && request.has_key?('id')
-        resp['id'] = request['id'] 
+        resp['id'] = request['id']
       else
         resp['id'] = nil
       end
+
+      @logger.log(Logger::ERROR, "RESPONSE: #{error.to_h}", 'Jimson')
 
       resp
     end
 
     def success_response(request, result)
+      @logger.log(Logger::INFO, "RESPONSE: #{result.inspect}", 'Jimson')
+
       {
         'jsonrpc' => JSON_RPC_VERSION,
-        'result'  => result,  
+        'result'  => result,
         'id'      => request['id']
       }
     end
 
     def parse_request(post)
       data = MultiJson.decode(post)
-      rescue 
-        raise Server::Error::ParseError.new 
+      rescue
+        raise Server::Error::ParseError.new
     end
-
   end
 end

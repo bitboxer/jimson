@@ -11,7 +11,7 @@ module Jimson
         def subtract(a, b = nil)
           if a.is_a?(Hash)
             return a['minuend'] - a['subtrahend']
-          else 
+          else
             return a - b
           end
         end
@@ -64,14 +64,18 @@ module Jimson
         end
       end
 
+      let(:logger) do
+        Logger.new("/dev/null")
+      end
+
       let(:app) do
-        Server.new(router, :environment => "production")
+        Server.new(router, :environment => "production", :logger => logger)
       end
 
       def post_json(hash)
         post '/', MultiJson.encode(hash), {'Content-Type' => 'application/json'}
       end
-      
+
       before(:each) do
         @url = SPEC_URL
       end
@@ -148,7 +152,7 @@ module Jimson
                     'id'      => 1
                   }
             post_json(req)
-            
+
             last_response.should be_ok
             resp = MultiJson.decode(last_response.body)
             resp.should == {
@@ -268,7 +272,7 @@ module Jimson
                     'id'      => 1
                   }
 
-            app = Server.new(router, :environment => "production", :show_errors => true)
+            app = Server.new(router, :environment => "production", :show_errors => true, :logger => logger)
 
             # have to make a new Rack::Test browser since this server is different than the normal one
             browser = Rack::Test::Session.new(Rack::MockSession.new(app))
@@ -318,7 +322,7 @@ module Jimson
                   }
             post_json(req)
             resp = MultiJson.decode(last_response.body)
-            resp.should == INVALID_RESPONSE_EXPECTATION 
+            resp.should == INVALID_RESPONSE_EXPECTATION
           end
         end
 
@@ -336,7 +340,7 @@ module Jimson
             req = [1,2]
             post_json(req)
             resp = MultiJson.decode(last_response.body)
-            resp.should == [INVALID_RESPONSE_EXPECTATION, INVALID_RESPONSE_EXPECTATION] 
+            resp.should == [INVALID_RESPONSE_EXPECTATION, INVALID_RESPONSE_EXPECTATION]
           end
         end
       end
@@ -350,7 +354,7 @@ module Jimson
                       {'jsonrpc' => '2.0', 'method' => 'subtract', 'params' => [42,23], 'id' => '2'},
                       {'foo' => 'boo'},
                       {'jsonrpc' => '2.0', 'method' => 'foo.get', 'params' => {'name' => 'myself'}, 'id' => '5'},
-                      {'jsonrpc' => '2.0', 'method' => 'get_data', 'id' => '9'} 
+                      {'jsonrpc' => '2.0', 'method' => 'get_data', 'id' => '9'}
                    ]
             post_json(reqs)
             resp = MultiJson.decode(last_response.body)
@@ -426,7 +430,7 @@ module Jimson
 
       describe ".with_routes" do
         it "creates a server with a router by passing the block to Router#draw" do
-          app = Server.with_routes do
+          app = Server.with_routes(:logger => logger) do
             root TestHandler.new
             namespace 'foo', OtherHandler.new
           end
