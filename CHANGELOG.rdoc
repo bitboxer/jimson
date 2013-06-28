@@ -1,3 +1,9 @@
+== 0.10.0 / 2013-06-28
+
+* Minor enhancements
+
+  * Update dependency versions
+
 == 0.9.1 / 2012-09-18
 
 * Bug fixes
