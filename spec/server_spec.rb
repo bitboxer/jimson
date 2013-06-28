@@ -279,7 +279,7 @@ module Jimson
                               'jsonrpc' => '2.0',
                               'error'   => {
                                               'code' => -32099,
-                                              'message' => "Server application error: RuntimeError at /home/chris/repos/jimson/spec/server_spec.rb:40:in `ugly_method'"
+                                              'message' => "Server application error: RuntimeError at #{__FILE__}:40:in `ugly_method'"
                                             },
                               'id'      => 1
                             }
