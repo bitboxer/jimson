@@ -1,4 +1,4 @@
-spec = Gem::Specification.new do |s|
+Gem::Specification.new do |s|
   s.name = "jimson"
   s.version = "0.10.0"
   s.author = "Chris Kite"
@@ -11,8 +11,8 @@ spec = Gem::Specification.new do |s|
   s.extra_rdoc_files = ["README.md"]
   s.add_dependency("blankslate", "~> 3.1.2")
   s.add_dependency("rest-client", "~> 1.6.7")
-  s.add_dependency("multi_json", "~> 1.7.6")
-  s.add_dependency("rack", "~> 1.4.5")
+  s.add_dependency("multi_json", ">= 1.7.6")
+  s.add_dependency("rack", ">= 1.4.5")
 
   s.files = %w[
     VERSION
