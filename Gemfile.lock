@@ -1,21 +1,21 @@
 PATH
   remote: .
   specs:
-    jimson (0.9.1)
+    jimson (0.10.0)
       blankslate (~> 3.1.2)
-      multi_json (~> 1.7.6)
-      rack (~> 1.4.5)
+      multi_json (>= 1.7.6)
+      rack (>= 1.4.5)
       rest-client (~> 1.6.7)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     blankslate (3.1.2)
     diff-lcs (1.2.4)
     json (1.8.0)
     json (1.8.0-java)
-    mime-types (1.23)
-    multi_json (1.7.6)
+    mime-types (2.1)
+    multi_json (1.8.4)
     rack (1.4.5)
     rack-test (0.6.2)
       rack (>= 1.0)
