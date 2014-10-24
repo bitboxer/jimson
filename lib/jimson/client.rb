@@ -73,14 +73,11 @@ module Jimson
 
     def process_single_response(data)
       raise Client::Error::InvalidResponse.new if !valid_response?(data)
-
       if !!data['error']
-        code = data['error']['code']
-        msg = data['error']['message']
-        raise Client::Error::ServerError.new(code, msg)
+        return data['error']
+      else
+        return data['result']
       end
-
-      return data['result']
     end
 
     def valid_response?(data)
