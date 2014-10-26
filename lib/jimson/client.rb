@@ -73,14 +73,11 @@ module Jimson
 
     def process_single_response(data)
       raise Client::Error::InvalidResponse.new if !valid_response?(data)
-
       if !!data['error']
-        code = data['error']['code']
-        msg = data['error']['message']
-        raise Client::Error::ServerError.new(code, msg)
+        return data['error']
+      else
+        return data['result']
       end
-
-      return data['result']
     end
 
     def valid_response?(data)
@@ -93,7 +90,7 @@ module Jimson
       return false if data.has_key?('error') && data.has_key?('result')
 
       if data.has_key?('error')
-        if !data['error'].is_a?(Hash) || !data['error'].has_key?('code') || !data['error'].has_key?('message') 
+        if !data['error'].is_a?(Hash) || !data['error'].has_key?('code') || !data['error'].has_key?('message')
           return false
         end
 
@@ -103,7 +100,7 @@ module Jimson
       end
 
       return true
-      
+
       rescue
         return false
     end
@@ -116,7 +113,7 @@ module Jimson
     end
 
     def send_batch
-      batch = @batch.map(&:first) # get the requests 
+      batch = @batch.map(&:first) # get the requests
       response = send_batch_request(batch)
 
       begin
@@ -132,14 +129,14 @@ module Jimson
   end
 
   class BatchClient < BlankSlate
-    
+
     def initialize(helper)
       @helper = helper
     end
 
     def method_missing(sym, *args, &block)
       request = Jimson::Request.new(sym.to_s, args)
-      @helper.push_batch_request(request) 
+      @helper.push_batch_request(request)
     end
 
   end
@@ -148,7 +145,7 @@ module Jimson
     reveal :instance_variable_get
     reveal :inspect
     reveal :to_s
-    
+
     def self.batch(client)
       helper = client.instance_variable_get(:@helper)
       batch_client = BatchClient.new(helper)
@@ -162,7 +159,7 @@ module Jimson
     end
 
     def method_missing(sym, *args, &block)
-      @helper.process_call(sym, args) 
+      @helper.process_call(sym, args)
     end
 
     def [](method, *args)
@@ -171,7 +168,7 @@ module Jimson
         new_ns = @namespace.nil? ? "#{method}." : "#@namespace#{method}."
         return Client.new(@url, @opts, new_ns)
       end
-      @helper.process_call(method, args) 
+      @helper.process_call(method, args)
     end
 
   end

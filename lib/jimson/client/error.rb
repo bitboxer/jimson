@@ -13,11 +13,6 @@ module Jimson
         end
       end
 
-      class ServerError < StandardError
-        def initialize(code, message)
-          super("Server error #{code}: #{message}")
-        end
-      end
     end
   end
 end

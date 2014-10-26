@@ -5,8 +5,8 @@ module Jimson
     BOILERPLATE = {'jsonrpc' => '2.0', 'id' => 1}
 
     before(:each) do
-      @resp_mock = mock('http_response')
-      ClientHelper.stub!(:make_id).and_return(1)
+      @resp_mock = double('http_response')
+      allow(ClientHelper).to receive(:make_id) { 1 }
     end
 
     after(:each) do
@@ -138,7 +138,7 @@ module Jimson
           {"jsonrpc" => "2.0", "method" => "sum", "params" => [1,2,4], "id" => "1"},
           {"jsonrpc" => "2.0", "method" => "subtract", "params" => [42,23], "id" => "2"},
           {"jsonrpc" => "2.0", "method" => "foo_get", "params" => [{"name" => "myself"}], "id" => "5"},
-          {"jsonrpc" => "2.0", "method" => "get_data", "id" => "9"} 
+          {"jsonrpc" => "2.0", "method" => "get_data", "id" => "9"}
         ])
 
         response = MultiJson.encode([
@@ -148,7 +148,7 @@ module Jimson
           {"jsonrpc" => "2.0", "result" => ["hello", 5], "id" => "9"}
         ])
 
-        ClientHelper.stub!(:make_id).and_return('1', '2', '5', '9')
+        allow(ClientHelper).to receive(:make_id).and_return('1', '2', '5', '9')
         RestClient.should_receive(:post).with(SPEC_URL, batch, {:content_type => 'application/json'}).and_return(@resp_mock)
         @resp_mock.should_receive(:body).at_least(:once).and_return(response)
         client = Client.new(SPEC_URL)
@@ -161,17 +161,17 @@ module Jimson
           data = batch.get_data
         end
 
-        sum.succeeded?.should be_true
-        sum.is_error?.should be_false
-        sum.result.should == 7
+        expect(sum.succeeded?).to eq(true)
+        expect(sum.is_error?).to eq(false)
+        expect(sum.result).to eq(7)
 
-        subtract.result.should == 19
+        expect(subtract.result).to eq(19)
 
-        foo.is_error?.should be_true
-        foo.succeeded?.should be_false
-        foo.error['code'].should == -32601
+        expect(foo.is_error?).to eq(true)
+        expect(foo.succeeded?).to eq(false)
+        expect(foo.error['code']).to eq(-32601)
 
-        data.result.should == ['hello', 5]
+        expect(data.result).to eq(['hello', 5])
       end
     end
 
@@ -179,10 +179,10 @@ module Jimson
       context "when an error occurs in the Jimson::Client code" do
         it "tags the raised exception with Jimson::Client::Error" do
           client_helper = ClientHelper.new(SPEC_URL)
-          ClientHelper.stub!(:new).and_return(client_helper)
+          allow(ClientHelper).to receive(:new).and_return(client_helper)
           client = Client.new(SPEC_URL)
-          client_helper.stub!(:send_single_request).and_raise "intentional error"
-          lambda { client.foo }.should raise_error(Jimson::Client::Error)
+          allow(client_helper).to receive(:send_single_request).and_raise "intentional error"
+          expect(lambda { client.foo }).to raise_error(Jimson::Client::Error)
         end
       end
     end
