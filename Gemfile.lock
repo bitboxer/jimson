@@ -1,21 +1,21 @@
 PATH
   remote: .
   specs:
-    jimson (0.9.1)
+    jimson (0.10.0)
       blankslate (~> 3.1.2)
       multi_json (~> 1.7.6)
       rack (~> 1.4.5)
       rest-client (~> 1.6.7)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
-    blankslate (3.1.2)
+    blankslate (3.1.3)
     diff-lcs (1.2.4)
     json (1.8.0)
     json (1.8.0-java)
-    mime-types (1.23)
-    multi_json (1.7.6)
+    mime-types (1.25.1)
+    multi_json (1.7.9)
     rack (1.4.5)
     rack-test (0.6.2)
       rack (>= 1.0)
@@ -23,8 +23,8 @@ GEM
     rcov (1.0.0)
     rdoc (4.0.1)
       json (~> 1.4)
-    rest-client (1.6.7)
-      mime-types (>= 1.16)
+    rest-client (1.6.9)
+      mime-types (~> 1.16)
     rspec (2.13.0)
       rspec-core (~> 2.13.0)
       rspec-expectations (~> 2.13.0)
@@ -45,3 +45,6 @@ DEPENDENCIES
   rcov
   rdoc (>= 2.4.2)
   rspec
+
+BUNDLED WITH
+   1.11.2
