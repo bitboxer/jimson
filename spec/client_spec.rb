@@ -55,6 +55,21 @@ module Jimson
             @client[:foo][:bar].sum(1, 2, 3).should == 42
           end
         end
+
+        context "when sending named paramaters" do
+          it "sends the the params as a hash" do
+            expected = MultiJson.encode({
+             'jsonrpc' => '2.0',
+             'method'  => 'foo.sum',
+             'params'  => { :first_number => 5, :second_number => 6 },
+             'id'      => 1
+            })
+            response = MultiJson.encode(BOILERPLATE.merge({'result' => 11}))
+            RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+            @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+            @client[:foo].sum({:first_number => 5, :second_number => 6}).should == 11
+          end
+        end
       end
 
       context "when sending positional arguments" do
@@ -137,7 +152,7 @@ module Jimson
         batch = MultiJson.encode([
           {"jsonrpc" => "2.0", "method" => "sum", "params" => [1,2,4], "id" => "1"},
           {"jsonrpc" => "2.0", "method" => "subtract", "params" => [42,23], "id" => "2"},
-          {"jsonrpc" => "2.0", "method" => "foo_get", "params" => [{"name" => "myself"}], "id" => "5"},
+          {"jsonrpc" => "2.0", "method" => "foo_get", "params" => {"name" => "myself"}, "id" => "5"},
           {"jsonrpc" => "2.0", "method" => "get_data", "id" => "9"} 
         ])
 
