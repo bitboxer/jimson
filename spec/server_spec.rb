@@ -458,7 +458,7 @@ module Jimson
               namespace 'foo', OtherHandler.new
             end
 
-            app.show_errors.should be_true
+            app.show_errors.should be true
           end
         end
       end

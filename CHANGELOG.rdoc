@@ -1,3 +1,10 @@
+== 0.11.0 / 2016-03-13
+
+* Minor enhancements
+
+  * Update dependency versions for Ruby 2.*
+  * Remove Gemfile.lock
+
 == 0.10.0 / 2013-06-28
 
 * Minor enhancements
