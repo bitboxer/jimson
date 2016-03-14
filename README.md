@@ -1,6 +1,6 @@
 # Jimson
 ### JSON-RPC 2.0 Client and Server for Ruby
-![next build status](https://secure.travis-ci.org/chriskite/jimson.png?branch=next)
+[![Build Status](https://travis-ci.org/chriskite/jimson.svg?branch=master)](https://travis-ci.org/chriskite/jimson)
 
 ## Client: Quick Start
     require 'jimson'
