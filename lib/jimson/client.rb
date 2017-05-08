@@ -122,7 +122,7 @@ module Jimson
       begin
         responses = MultiJson.decode(response)
       rescue
-        raise Client::Error::InvalidJSON.new(json)
+        raise Client::Error::InvalidJSON.new(response)
       end
 
       process_batch_response(responses)
