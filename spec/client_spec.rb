@@ -6,7 +6,7 @@ module Jimson
 
     before(:each) do
       @resp_mock = double('http_response')
-      ClientHelper.stub(:make_id).and_return(1)
+      allow(ClientHelper).to receive(:make_id).and_return(1)
     end
 
     after(:each) do
@@ -14,11 +14,11 @@ module Jimson
 
     describe "hidden methods" do
       it "should reveal inspect" do
-        Client.new(SPEC_URL).inspect.should match /Jimson::Client/
+        expect(Client.new(SPEC_URL).inspect).to match /Jimson::Client/
       end
 
       it "should reveal to_s" do
-        Client.new(SPEC_URL).to_s.should match /Jimson::Client/
+        expect(Client.new(SPEC_URL).to_s).to match /Jimson::Client/
       end
     end
 
@@ -36,9 +36,9 @@ module Jimson
            'id'      => 1
           })
           response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
-          RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
-          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
-          @client[:foo].sum(1, 2, 3).should == 42
+          expect(RestClient).to receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+          expect(@resp_mock).to receive(:body).at_least(:once).and_return(response)
+          expect(@client[:foo].sum(1, 2, 3)).to eq 42
         end
 
         context "when the namespace is nested" do
@@ -50,9 +50,9 @@ module Jimson
              'id'      => 1
             })
             response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
-            RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
-            @resp_mock.should_receive(:body).at_least(:once).and_return(response)
-            @client[:foo][:bar].sum(1, 2, 3).should == 42
+            expect(RestClient).to receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+            expect(@resp_mock).to receive(:body).at_least(:once).and_return(response)
+            expect(@client[:foo][:bar].sum(1, 2, 3)).to eq 42
           end
         end
       end
@@ -66,9 +66,9 @@ module Jimson
            'id'      => 1
           })
           response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
-          RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
-          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
-          @client['foo', 1, 2, 3].should == 42
+          expect(RestClient).to receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+          expect(@resp_mock).to receive(:body).at_least(:once).and_return(response)
+          expect(@client['foo', 1, 2, 3]).to eq 42
         end
 
         context "when one of the args is an array" do
@@ -80,9 +80,9 @@ module Jimson
              'id'      => 1
             })
             response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
-            RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
-            @resp_mock.should_receive(:body).at_least(:once).and_return(response)
-            @client['foo', [1, 2], 3].should == 42
+            expect(RestClient).to receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+            expect(@resp_mock).to receive(:body).at_least(:once).and_return(response)
+            expect(@client['foo', [1, 2], 3]).to eq 42
           end
         end
       end
@@ -100,18 +100,18 @@ module Jimson
         end
         it "sends a valid JSON-RPC request and returns the result" do
           response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
-          RestClient.should_receive(:post).with(SPEC_URL, @expected, {:content_type => 'application/json'}).and_return(@resp_mock)
-          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+          expect(RestClient).to receive(:post).with(SPEC_URL, @expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+          expect(@resp_mock).to receive(:body).at_least(:once).and_return(response)
           client = Client.new(SPEC_URL)
-          client.foo(1,2,3).should == 42
+          expect(client.foo(1,2,3)).to eq 42
         end
 
         it "sends a valid JSON-RPC request with custom options" do
           response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
-          RestClient.should_receive(:post).with(SPEC_URL, @expected, {:content_type => 'application/json', :timeout => 10000}).and_return(@resp_mock)
-          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+          expect(RestClient).to receive(:post).with(SPEC_URL, @expected, {:content_type => 'application/json', :timeout => 10000}).and_return(@resp_mock)
+          expect(@resp_mock).to receive(:body).at_least(:once).and_return(response)
           client = Client.new(SPEC_URL, :timeout => 10000)
-          client.foo(1,2,3).should == 42
+          expect(client.foo(1,2,3)).to eq 42
         end
       end
 
@@ -124,10 +124,10 @@ module Jimson
             'id'      => 1
           })
           response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
-          RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
-          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+          expect(RestClient).to receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+          expect(@resp_mock).to receive(:body).at_least(:once).and_return(response)
           client = Client.new(SPEC_URL)
-          client.foo([1,2],3).should == 42
+          expect(client.foo([1,2],3)).to eq 42
         end
       end
     end
@@ -148,9 +148,9 @@ module Jimson
           {"jsonrpc" => "2.0", "result" => ["hello", 5], "id" => "9"}
         ])
 
-        ClientHelper.stub(:make_id).and_return('1', '2', '5', '9')
-        RestClient.should_receive(:post).with(SPEC_URL, batch, {:content_type => 'application/json'}).and_return(@resp_mock)
-        @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+        allow(ClientHelper).to receive(:make_id).and_return('1', '2', '5', '9')
+        expect(RestClient).to receive(:post).with(SPEC_URL, batch, {:content_type => 'application/json'}).and_return(@resp_mock)
+        expect(@resp_mock).to receive(:body).at_least(:once).and_return(response)
         client = Client.new(SPEC_URL)
 
         sum = subtract = foo = data = nil
@@ -161,17 +161,17 @@ module Jimson
           data = batch.get_data
         end
 
-        sum.succeeded?.should be true
-        sum.is_error?.should be false
-        sum.result.should == 7
+        expect(sum.succeeded?).to be true
+        expect(sum.is_error?).to be false
+        expect(sum.result).to eq 7
 
-        subtract.result.should == 19
+        expect(subtract.result).to eq 19
 
-        foo.is_error?.should be true
-        foo.succeeded?.should be false
-        foo.error['code'].should == -32601
+        expect(foo.is_error?).to be true
+        expect(foo.succeeded?).to be false
+        expect(foo.error['code']).to eq -32601
 
-        data.result.should == ['hello', 5]
+        expect(data.result).to eq ['hello', 5]
       end
     end
 
@@ -179,10 +179,10 @@ module Jimson
       context "when an error occurs in the Jimson::Client code" do
         it "tags the raised exception with Jimson::Client::Error" do
           client_helper = ClientHelper.new(SPEC_URL)
-          ClientHelper.stub(:new).and_return(client_helper)
+          allow(ClientHelper).to receive(:new).and_return(client_helper)
           client = Client.new(SPEC_URL)
-          client_helper.stub(:send_single_request).and_raise "intentional error"
-          lambda { client.foo }.should raise_error(Jimson::Client::Error)
+          allow(client_helper).to receive(:send_single_request).and_raise "intentional error"
+          expect(lambda { client.foo }).to raise_error(Jimson::Client::Error)
         end
       end
     end

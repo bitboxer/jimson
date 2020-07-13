@@ -77,7 +77,7 @@ module Jimson
       end
 
       it "exposes the given options" do
-        app.opts.should == { :environment => "production" }
+        expect(app.opts).to eq({ :environment => "production" })
       end
 
       describe "receiving a request with positional parameters" do
@@ -91,13 +91,13 @@ module Jimson
                   }
             post_json(req)
 
-            last_response.should be_ok
+            expect(last_response).to be_ok
             resp = MultiJson.decode(last_response.body)
-            resp.should == {
+            expect(resp).to eq({
                              'jsonrpc' => '2.0',
                              'result'  => 4,
                              'id'      => 1
-                           }
+                           })
           end
 
           it "handles an array in the parameters" do
@@ -109,31 +109,31 @@ module Jimson
                   }
             post_json(req)
 
-            last_response.should be_ok
+            expect(last_response).to be_ok
             resp = MultiJson.decode(last_response.body)
-            resp.should == {
+            expect(resp).to eq({
                              'jsonrpc' => '2.0',
                              'result'  => 'a',
                              'id'      => 1
-                           }
+                           })
           end
 
           it "handles bignums" do
-            req = {
+            req =({
                     'jsonrpc' => '2.0',
                     'method'  => 'subtract',
                     'params'  => [24, 20],
                     'id'      => 123456789_123456789_123456789
-                  }
+                  })
             post_json(req)
 
-            last_response.should be_ok
+            expect(last_response).to be_ok
             resp = MultiJson.decode(last_response.body)
-            resp.should == {
+            expect(resp).to eq({
                              'jsonrpc' => '2.0',
                              'result'  => 4,
                              'id'      => 123456789_123456789_123456789
-                           }
+                           })
           end
         end
       end
@@ -141,21 +141,21 @@ module Jimson
       describe "receiving a request with named parameters" do
         context "when no errors occur" do
           it "returns a response with 'result'" do
-            req = {
+            req =({
                     'jsonrpc' => '2.0',
                     'method'  => 'subtract',
                     'params'  => {'subtrahend'=> 20, 'minuend' => 24},
                     'id'      => 1
-                  }
+                  })
             post_json(req)
             
-            last_response.should be_ok
+            expect(last_response).to be_ok
             resp = MultiJson.decode(last_response.body)
-            resp.should == {
+            expect(resp).to eq({
                              'jsonrpc' => '2.0',
                              'result'  => 4,
                              'id'      => 1
-                           }
+                           })
           end
         end
       end
@@ -163,13 +163,13 @@ module Jimson
       describe "receiving a notification" do
         context "when no errors occur" do
           it "returns no response" do
-            req = {
+            req =({
                     'jsonrpc' => '2.0',
                     'method'  => 'update',
                     'params'  => [1,2,3,4,5]
-                  }
+                  })
             post_json(req)
-            last_response.body.should be_empty
+            expect(last_response.body).to be_empty
           end
         end
       end
@@ -184,14 +184,14 @@ module Jimson
           post_json(req)
 
           resp = MultiJson.decode(last_response.body)
-          resp.should == {
+          expect(resp).to eq({
                             'jsonrpc' => '2.0',
                             'error'   => {
                                             'code' => -32601,
                                             'message' => "Method 'foobar' not found."
                                           },
                             'id'      => 1
-                          }
+                          })
         end
       end
 
@@ -205,14 +205,14 @@ module Jimson
           post_json(req)
 
           resp = MultiJson.decode(last_response.body)
-          resp.should == {
+          expect(resp).to eq({
                             'jsonrpc' => '2.0',
                             'error'   => {
                                             'code' => -32601,
                                             'message' => "Method 'object_id' not found."
                                           },
                             'id'      => 1
-                          }
+                          })
         end
       end
 
@@ -227,14 +227,14 @@ module Jimson
           post_json(req)
 
           resp = MultiJson.decode(last_response.body)
-          resp.should == {
+          expect(resp).to eq({
                             'jsonrpc' => '2.0',
                             'error'   => {
                                             'code' => -32602,
                                             'message' => 'Invalid method parameter(s).'
                                           },
                             'id'      => 1
-                          }
+                          })
         end
       end
 
@@ -249,14 +249,14 @@ module Jimson
             post_json(req)
 
             resp = MultiJson.decode(last_response.body)
-            resp.should == {
+            expect(resp).to eq({
                               'jsonrpc' => '2.0',
                               'error'   => {
                                               'code' => -32099,
                                               'message' => 'Server application error'
                                             },
                               'id'      => 1
-                            }
+                            })
           end
         end
 
@@ -275,14 +275,14 @@ module Jimson
             browser.post '/', MultiJson.encode(req), {'Content-Type' => 'application/json'}
 
             resp = MultiJson.decode(browser.last_response.body)
-            resp.should == {
+            expect(resp).to eq({
                               'jsonrpc' => '2.0',
                               'error'   => {
                                               'code' => -32099,
                                               'message' => "Server application error: RuntimeError at #{__FILE__}:40:in `ugly_method'"
                                             },
                               'id'      => 1
-                            }
+                            })
           end
         end
       end
@@ -298,14 +298,14 @@ module Jimson
           post '/', req, {'Content-type' => 'application/json'}
 
           resp = MultiJson.decode(last_response.body)
-          resp.should == {
+          expect(resp).to eq({
                             'jsonrpc' => '2.0',
                             'error'   => {
                                             'code' => -32700,
                                             'message' => 'Invalid JSON was received by the server. An error occurred on the server while parsing the JSON text.'
                                           },
                             'id'      => nil
-                          }
+                          })
         end
       end
 
@@ -318,7 +318,7 @@ module Jimson
                   }
             post_json(req)
             resp = MultiJson.decode(last_response.body)
-            resp.should == INVALID_RESPONSE_EXPECTATION 
+            expect(resp).to eq INVALID_RESPONSE_EXPECTATION 
           end
         end
 
@@ -327,7 +327,7 @@ module Jimson
             req = []
             post_json(req)
             resp = MultiJson.decode(last_response.body)
-            resp.should == INVALID_RESPONSE_EXPECTATION
+            expect(resp).to eq INVALID_RESPONSE_EXPECTATION
           end
         end
 
@@ -336,7 +336,7 @@ module Jimson
             req = [1,2]
             post_json(req)
             resp = MultiJson.decode(last_response.body)
-            resp.should == [INVALID_RESPONSE_EXPECTATION, INVALID_RESPONSE_EXPECTATION] 
+            expect(resp).to eq [INVALID_RESPONSE_EXPECTATION, INVALID_RESPONSE_EXPECTATION] 
           end
         end
       end
@@ -354,7 +354,7 @@ module Jimson
                    ]
             post_json(reqs)
             resp = MultiJson.decode(last_response.body)
-            resp.should == [
+            expect(resp).to eq [
                     {'jsonrpc' => '2.0', 'result' => 7, 'id' => '1'},
                     {'jsonrpc' => '2.0', 'result' => 19, 'id' => '2'},
                     {'jsonrpc' => '2.0', 'error' => {'code' => -32600, 'message' => 'The JSON sent is not a valid Request object.'}, 'id' => nil},
@@ -379,7 +379,7 @@ module Jimson
                     }
                   ]
             post_json(req)
-            last_response.body.should be_empty
+            expect(last_response.body).to be_empty
           end
         end
       end
@@ -395,13 +395,13 @@ module Jimson
                   }
             post_json(req)
 
-            last_response.should be_ok
+            expect(last_response).to be_ok
             resp = MultiJson.decode(last_response.body)
-            resp.should == {
+            expect(resp).to eq({
                              'jsonrpc' => '2.0',
                              'result'  => true,
                              'id'      => 1
-                           }
+                           })
           end
         end
         context "when the request is 'system.listMethods'" do
@@ -414,12 +414,12 @@ module Jimson
                   }
             post_json(req)
 
-            last_response.should be_ok
+            expect(last_response).to be_ok
             resp = MultiJson.decode(last_response.body)
-            resp['jsonrpc'].should == '2.0'
-            resp['id'].should == 1
+            expect(resp['jsonrpc']).to eq '2.0'
+            expect(resp['id']).to eq 1
             expected = ['get_data', 'notify_hello', 'subtract', 'sum', 'car', 'ugly_method', 'update', 'system.isAlive', 'system.listMethods', 'other.multiply']
-            (resp['result'] - expected).should == []
+            expect((resp['result'] - expected)).to eq []
           end
         end
       end
@@ -442,13 +442,13 @@ module Jimson
                 }
           browser.post '/', MultiJson.encode(req), {'Content-Type' => 'application/json'}
 
-          browser.last_response.should be_ok
+          expect(browser.last_response).to be_ok
           resp = MultiJson.decode(browser.last_response.body)
-          resp.should == {
+          expect(resp).to eq({
                            'jsonrpc' => '2.0',
                            'result'  => 6,
                            'id'      => 1
-                         }
+                         })
         end
 
         context "when opts are given" do
@@ -458,7 +458,7 @@ module Jimson
               namespace 'foo', OtherHandler.new
             end
 
-            app.show_errors.should be true
+            expect(app.show_errors).to be true
           end
         end
       end
