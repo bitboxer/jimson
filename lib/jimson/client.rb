@@ -162,6 +162,7 @@ module Jimson
     end
 
     def method_missing(sym, *args, &block)
+      args = args.first if args.size == 1 && args.first.is_a?(Hash)
       @helper.process_call(sym, args) 
     end
 
