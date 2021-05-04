@@ -2,6 +2,9 @@
 
 * Unified Bignum and Fixnum to Integer
 * Add ability to specify custom content type
+* Add data returned to invalid response exception
+* Add support for named parameters
+* Add Router :ns_sep option for custom namespace
 
 == 0.11.0 / 2016-03-13
 
