@@ -4,7 +4,7 @@ require 'jimson/version'
 spec = Gem::Specification.new do |s|
   s.name = "jimson-reloaded"
   s.version = Jimson::VERSION
-  s.author = "Chris Kite"
+  s.authors = ["Chris Kite", "Gilbert", "Bodo Tasche"]
   s.homepage = "https://github.com/bitboxer/jimson.git"
   s.licenses = ["MIT"]
   s.platform = Gem::Platform::RUBY

@@ -1,14 +1,15 @@
 # Jimson
+
 ### JSON-RPC 2.0 Client and Server for Ruby
 [![Build Status](https://travis-ci.org/chriskite/jimson.svg?branch=master)](https://travis-ci.org/chriskite/jimson)
 
 ## Client: Quick Start
-    require 'jimson-temp'
+    require 'jimson-reloaded'
     client = Jimson::Client.new("http://www.example.com:8999") # the URL for the JSON-RPC 2.0 server to connect to
     result = client.sum(1,2) # call the 'sum' method on the RPC server and save the result '3'
 
 ## Server: Quick Start
-    require 'jimson-temp'
+    require 'jimson-reloaded'
 
     class MyHandler
       extend Jimson::Handler
