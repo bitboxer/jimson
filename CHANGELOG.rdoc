@@ -1,6 +1,7 @@
 == 0.12.0 / 
 
 * Unified Bignum and Fixnum to Integer
+* Add ability to specify custom content type
 
 == 0.11.0 / 2016-03-13
 
