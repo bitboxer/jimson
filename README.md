@@ -1,10 +1,8 @@
-# Jimson-Reloaded
-
-This is a fork of [chriskite/jimson](https://github.com/chriskite/jimson). I merged all open PRs of the original unmaintaned gem and will maintain it as `jimson-reloaded`. PRs are welcome 🤗.
+# Jimson
 
 ### JSON-RPC 2.0 Client and Server for Ruby
 
-[![Build Status](https://github.com/bitboxer/jimson/actions/workflows/ruby.yml/badge.svg?branch=main)](https://github.com/bitboxer/jimson/actions/workflows/ruby.yml)
+[![Build Status](https://github.com/railslove/jimson/actions/workflows/ruby.yml/badge.svg?branch=main)](https://github.com/railslove/jimson/actions/workflows/ruby.yml)
 
 ## Client: Quick Start
 

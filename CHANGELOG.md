@@ -1,4 +1,4 @@
-== 0.12.0 / 
+# 0.12.0 / 
 
 * Unified Bignum and Fixnum to Integer
 * Add ability to specify custom content type
@@ -6,46 +6,47 @@
 * Add support for named parameters
 * Add Router :ns_sep option for custom namespace
 * Fix json variable name on invalid json response
+* made it possible to overwrite advanced RestClient values, like ssl_ca_file
 
-== 0.11.0 / 2016-03-13
+# 0.11.0 / 2016-03-13
 
 * Minor enhancements
 
   * Update dependency versions for Ruby 2.*
   * Remove Gemfile.lock
 
-== 0.10.0 / 2013-06-28
+# 0.10.0 / 2013-06-28
 
 * Minor enhancements
 
   * Update dependency versions
 
-== 0.9.1 / 2012-09-18
+# 0.9.1 / 2012-09-18
 
 * Bug fixes
 
   * Allow opts to be passed to Server.with_routes
 
-== 0.9.0 / 2012-08-22
+# 0.9.0 / 2012-08-22
 
 * Minor enhancements
 
   * Add show_errors option to server, which will cause application errors to include the error name and the first line of the backtrace
 
-== 0.8.0 / 2012-08-17
+# 0.8.0 / 2012-08-17
 
 * Major enhancements
 
   * Add namespaced method calls to client (e.g. 'client[:foo].sum(1,2,3) # calls foo.sum')
   * Add Server.with_routes to quickly created a routed server
 
-== 0.7.1 / 2012-08-16
+# 0.7.1 / 2012-08-16
 
 * Bug fixes
 
   * Fix handling of array params in client, which were erroneously being flattened
 
-== 0.7.0 / 2012-04-13
+# 0.7.0 / 2012-04-13
 
 * Major enhancements
 
@@ -55,13 +56,13 @@
 
   * Fix deprecation warning about RDoc task in Rakefile
 
-== 0.6.0 / 2012-03-14
+# 0.6.0 / 2012-03-14
 
 * Minor enhancements
 
   * Add ability to pass options to Rack and RestClient
 
-== 0.5.0 / 2012-03-06
+# 0.5.0 / 2012-03-06
 
 * Major enhancements
 
@@ -71,37 +72,37 @@
 
   * Allow BigNum in 'id' field of request and response
 
-== 0.3.1 / 2011-08-11
+# 0.3.1 / 2011-08-11
 
 * Minor enhancements
 
   * Refactor the way the server is intantiated/started to work better with config.ru
 
-== 0.3.0 / 2011-08-11
+# 0.3.0 / 2011-08-11
 
 * Major enhancements
 
   * Replace eventmachine-httpserver with rack for more cross-platform goodness
 
-== 0.2.3 / 2011-08-01
+# 0.2.3 / 2011-08-01
 
 * Bug fixes
 
   * Fix argument error in client error handling
 
-== 0.2.2 / 2011-07-28
+# 0.2.2 / 2011-07-28
 
 * Bug fixes
 
   * Fix invalid local variable error in client error handling
 
-== 0.2.1 / 2011-07-27
+# 0.2.1 / 2011-07-27
 
 * Bug fixes
 
   * Fix error in client handling some errors caused by errant 'new' keyword
 
-== 0.2.0 / 2011-07-20
+# 0.2.0 / 2011-07-20
 
 * Major enhancements
 
