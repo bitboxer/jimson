@@ -11,8 +11,8 @@ module Jimson
                           :jimson_methods,
                           :strip_method_namespace
 
-    def initialize
-      @map = Map.new
+    def initialize(opts = {})
+      @map = Map.new(opts)
     end
 
     def draw(&block)

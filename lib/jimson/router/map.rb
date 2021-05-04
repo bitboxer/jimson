@@ -7,8 +7,10 @@ module Jimson
     #
     class Map
 
-      def initialize
+      def initialize(opts = {})
         @routes = {}
+        @opts = opts
+        @ns_sep = opts[:ns_sep] || '.'
       end
 
       #
@@ -28,7 +30,7 @@ module Jimson
           @routes[ns.to_s] = handler
         else
           # passed a block for nested namespacing
-          map = Jimson::Router::Map.new
+          map = Jimson::Router::Map.new(@opts)
           @routes[ns.to_s] = map
           map.instance_eval &block
         end
@@ -38,11 +40,11 @@ module Jimson
       # Return the handler for a (possibly namespaced) method name
       #
       def handler_for_method(method)
-        parts = method.split('.')
-        ns = (method.index('.') == nil ? '' : parts.first)
+        parts = method.split(@ns_sep)
+        ns = (method.index(@ns_sep) == nil ? '' : parts.first)
         handler = @routes[ns]
         if handler.is_a?(Jimson::Router::Map)
-          return handler.handler_for_method(parts[1..-1].join('.'))
+          return handler.handler_for_method(parts[1..-1].join(@ns_sep))
         end
         handler
       end
@@ -51,7 +53,7 @@ module Jimson
       # Strip off the namespace part of a method and return the bare method name
       #
       def strip_method_namespace(method)
-        method.split('.').last
+        method.split(@ns_sep).last
       end
 
       #
@@ -59,7 +61,7 @@ module Jimson
       #
       def jimson_methods
         arr = @routes.keys.map do |ns|
-          prefix = (ns == '' ? '' : "#{ns}.")
+          prefix = (ns == '' ? '' : "#{ns}#{@ns_sep}")
           handler = @routes[ns]
           if handler.is_a?(Jimson::Router::Map)
             handler.jimson_methods
