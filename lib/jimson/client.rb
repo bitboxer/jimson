@@ -97,7 +97,7 @@ module Jimson
           return false
         end
 
-        if !data['error']['code'].is_a?(Fixnum) || !data['error']['message'].is_a?(String)
+        if !data['error']['code'].is_a?(Integer) || !data['error']['message'].is_a?(String)
           return false
         end
       end

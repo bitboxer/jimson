@@ -1,3 +1,7 @@
+== 0.12.0 / 
+
+* Unified Bignum and Fixnum to Integer
+
 == 0.11.0 / 2016-03-13
 
 * Minor enhancements
