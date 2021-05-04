@@ -4,7 +4,7 @@ This is a fork of [chriskite/jimson](https://github.com/chriskite/jimson). I mer
 
 ### JSON-RPC 2.0 Client and Server for Ruby
 
-[![Build Status](https://travis-ci.org/chriskite/jimson.svg?branch=master)](https://travis-ci.org/chriskite/jimson)
+[![Build Status](https://github.com/bitboxer/jimson/actions/workflows/ruby.yml/badge.svg?branch=main)](https://github.com/bitboxer/jimson/actions/workflows/ruby.yml)
 
 ## Client: Quick Start
 
