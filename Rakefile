@@ -4,6 +4,11 @@ require 'rubygems'
 require 'rake'
 require 'rspec/core/rake_task'
 
+gem 'rubygems-tasks', '~> 0.2'
+require 'rubygems/tasks'
+
+Gem::Tasks.new
+
 desc "Run all specs"
 RSpec::Core::RakeTask.new(:rspec) do |spec|
   spec.pattern = 'spec/**/*_spec.rb'
