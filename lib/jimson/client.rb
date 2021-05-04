@@ -12,13 +12,14 @@ module Jimson
       rand(10**12)
     end
 
-    def initialize(url, opts = {}, namespace = nil)
+    def initialize(url, opts = {}, namespace = nil, client_opts = {})
       @url = url
       URI.parse(@url) # for the sake of validating the url
       @batch = []
       @opts = opts
       @namespace = namespace
       @opts[:content_type] ||= 'application/json'
+      @client_opts = client_opts
     end
 
     def process_call(sym, args)
@@ -45,7 +46,7 @@ module Jimson
         'params'  => args,
         'id'      => self.class.make_id
       })
-      resp = RestClient.post(@url, post_data, @opts)
+      resp = RestClient::Request.execute(@client_opts.merge(:method => :post, :url => @url, :payload => post_data, :headers => @opts))
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise Client::Error::InvalidResponse.new(resp)
       end
@@ -55,7 +56,7 @@ module Jimson
 
     def send_batch_request(batch)
       post_data = MultiJson.encode(batch)
-      resp = RestClient.post(@url, post_data, @opts)
+      resp = RestClient::Request.execute(@client_opts.merge(:method => :post, :url => @url, :payload => post_data, :headers => @opts))
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise Client::Error::InvalidResponse.new(resp)
       end
@@ -156,9 +157,9 @@ module Jimson
       helper.send_batch
     end
 
-    def initialize(url, opts = {}, namespace = nil)
-      @url, @opts, @namespace = url, opts, namespace
-      @helper = ClientHelper.new(url, opts, namespace)
+    def initialize(url, opts = {}, namespace = nil, client_opts = {})
+      @url, @opts, @namespace, @client_opts = url, opts, namespace, client_opts
+      @helper = ClientHelper.new(url, opts, namespace, client_opts)
     end
 
     def method_missing(sym, *args, &block)
