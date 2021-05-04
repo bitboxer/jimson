@@ -22,7 +22,7 @@ spec = Gem::Specification.new do |s|
 
   s.files = %w[
     LICENSE.txt
-    CHANGELOG.rdoc
+    CHANGELOG.md
     README.md
     Rakefile
   ] + Dir['lib/**/*.rb']
