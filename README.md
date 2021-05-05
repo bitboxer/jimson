@@ -7,7 +7,7 @@
 ## Client: Quick Start
 
 ```ruby
-require 'jimson-reloaded'
+require 'jimson'
 client = Jimson::Client.new("http://www.example.com:8999") # the URL for the JSON-RPC 2.0 server to connect to
 result = client.sum(1,2) # call the 'sum' method on the RPC server and save the result '3'
 ```
@@ -15,7 +15,7 @@ result = client.sum(1,2) # call the 'sum' method on the RPC server and save the 
 ## Server: Quick Start
 
 ```ruby
-require 'jimson-reloaded'
+require 'jimson'
 
 class MyHandler
   extend Jimson::Handler

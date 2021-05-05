@@ -2,7 +2,7 @@ $:.unshift(File.dirname(__FILE__) + '/lib/')
 require 'jimson/version'
 
 spec = Gem::Specification.new do |s|
-  s.name = "jimson-reloaded"
+  s.name = "jimson"
   s.version = Jimson::VERSION
   s.authors = ["Chris Kite", "Gilbert", "Bodo Tasche"]
   s.homepage = "https://github.com/bitboxer/jimson.git"
