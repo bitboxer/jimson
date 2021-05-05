@@ -118,7 +118,7 @@ module Jimson
                            }
           end
 
-          it "handles bignums" do
+          it "handles integer" do
             req = {
                     'jsonrpc' => '2.0',
                     'method'  => 'subtract',
