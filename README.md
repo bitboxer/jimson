@@ -2,7 +2,7 @@
 
 ### JSON-RPC 2.0 Client and Server for Ruby
 
-[![Build Status](https://github.com/railslove/jimson/actions/workflows/ruby.yml/badge.svg?branch=main)](https://github.com/railslove/jimson/actions/workflows/ruby.yml)
+[![Build Status](https://github.com/chriskite/jimson/actions/workflows/ruby.yml/badge.svg?branch=main)](https://github.com/chriskite/jimson/actions/workflows/ruby.yml)
 
 ## Client: Quick Start
 
