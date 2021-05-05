@@ -1,6 +1,6 @@
 require 'rubygems'
 $:.unshift(File.dirname(__FILE__) + '/../lib/')
-require 'jimson-reloaded'
+require 'jimson'
 require 'bundler/setup'
 require 'multi_json'
 

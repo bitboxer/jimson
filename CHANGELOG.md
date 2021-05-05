@@ -1,12 +1,17 @@
-# 0.12.0 / 
+# 0.12.0 / 2021-05-05
 
-* Unified Bignum and Fixnum to Integer
-* Add ability to specify custom content type
-* Add data returned to invalid response exception
-* Add support for named parameters
-* Add Router :ns_sep option for custom namespace
-* Fix json variable name on invalid json response
-* made it possible to overwrite advanced RestClient values, like ssl_ca_file
+* Major enhancements
+
+  * Add ability to specify custom content type
+  * Add support for named parameters
+  * Add Router :ns_sep option for custom namespace
+  * made it possible to overwrite advanced RestClient values, like ssl_ca_file
+
+* Minor enhancements
+
+  * Unified Bignum and Fixnum to Integer
+  * Add data returned to invalid response exception
+  * Fix json variable name on invalid json response
 
 # 0.11.0 / 2016-03-13
 
