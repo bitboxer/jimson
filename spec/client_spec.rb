@@ -55,6 +55,20 @@ module Jimson
             @client[:foo][:bar].sum(1, 2, 3).should == 42
           end
         end
+
+        it "sends the id as string" do
+          expected = MultiJson.encode({
+           'jsonrpc' => '2.0',
+           'method'  => 'foo.sum',
+           'params'  => [1,2,3],
+           'id'      => "1"
+          })
+          response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
+          RestClient::Request.should_receive(:execute).with(method: :post, url: SPEC_URL, payload: expected, headers: {:content_type => 'application/json'}).and_return(@resp_mock)
+          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+          client = Client.new(SPEC_URL, {id_type: :string})
+          client[:foo].sum(1, 2, 3).should == 42
+        end
       end
 
       context "when sending positional arguments" do

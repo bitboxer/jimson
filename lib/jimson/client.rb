@@ -13,13 +13,16 @@ module Jimson
     end
 
     def initialize(url, opts = {}, namespace = nil, client_opts = {})
+      URI.parse(url) # for the sake of validating the url
       @url = url
-      URI.parse(@url) # for the sake of validating the url
-      @batch = []
       @opts = opts
+      @opts[:id_type] ||= :int # Possible id types: :int, :string
       @namespace = namespace
-      @opts[:content_type] ||= 'application/json'
       @client_opts = client_opts
+
+      @batch = []
+      @headers = opts.slice( * opts.keys - [:id_type] )
+      @headers[:content_type] ||= 'application/json'
     end
 
     def process_call(sym, args)
@@ -44,9 +47,9 @@ module Jimson
         'jsonrpc' => JSON_RPC_VERSION,
         'method'  => namespaced_method,
         'params'  => args,
-        'id'      => self.class.make_id
+        'id'      => format_post_id(self.class.make_id)
       })
-      resp = RestClient::Request.execute(@client_opts.merge(:method => :post, :url => @url, :payload => post_data, :headers => @opts))
+      resp = RestClient::Request.execute(@client_opts.merge(:method => :post, :url => @url, :payload => post_data, :headers => @headers))
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise Client::Error::InvalidResponse.new(resp)
       end
@@ -56,7 +59,7 @@ module Jimson
 
     def send_batch_request(batch)
       post_data = MultiJson.encode(batch)
-      resp = RestClient::Request.execute(@client_opts.merge(:method => :post, :url => @url, :payload => post_data, :headers => @opts))
+      resp = RestClient::Request.execute(@client_opts.merge(:method => :post, :url => @url, :payload => post_data, :headers => @headers))
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise Client::Error::InvalidResponse.new(resp)
       end
@@ -128,6 +131,14 @@ module Jimson
 
       process_batch_response(responses)
       @batch = []
+    end
+
+    def format_post_id(id)
+      if @opts[:id_type] == :string 
+        id.to_s
+      else
+        id
+      end
     end
 
   end

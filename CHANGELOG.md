@@ -1,3 +1,9 @@
+# 0.13.0 / 2021-05-10
+
+* Major enhancements
+
+  * Added option to use strings as id instead of an int
+
 # 0.12.0 / 2021-05-05
 
 * Major enhancements
