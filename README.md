@@ -39,3 +39,6 @@ For example, require the 'json' gem in your application:
 require 'json'
 ```
 
+## Previous maintainer
+
+This gem was maintained by [Chris Kite](https://github.com/chriskite/) till April 2021.
