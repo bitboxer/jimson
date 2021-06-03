@@ -1,6 +1,6 @@
 # Jimson
 
-### JSON-RPC 2.0 Client and Server for Ruby
+### [JSON-RPC 2.0](https://www.jsonrpc.org/specification) Client and Server for Ruby
 
 [![Build Status](https://github.com/chriskite/jimson/actions/workflows/ruby.yml/badge.svg?branch=main)](https://github.com/chriskite/jimson/actions/workflows/ruby.yml)
 
@@ -31,7 +31,7 @@ server.start # serve with webrick on http://0.0.0.0:8999/
 
 ## JSON Engine
 
-Jimson uses multi\_json, so you can load the JSON library of your choice in your application and Jimson will use it automatically.
+Jimson uses [multi\_json](https://github.com/intridea/multi_json), so you can load the JSON library of your choice in your application and Jimson will use it automatically.
 
 For example, require the 'json' gem in your application:
 
