@@ -12,13 +12,17 @@ module Jimson
       rand(10**12)
     end
 
-    def initialize(url, opts = {}, namespace = nil)
+    def initialize(url, opts = {}, namespace = nil, client_opts = {})
+      URI.parse(url) # for the sake of validating the url
       @url = url
-      URI.parse(@url) # for the sake of validating the url
-      @batch = []
       @opts = opts
+      @opts[:id_type] ||= :int # Possible id types: :int, :string
       @namespace = namespace
-      @opts[:content_type] = 'application/json'
+      @client_opts = client_opts
+
+      @batch = []
+      @headers = opts.slice( * opts.keys - [:id_type] )
+      @headers[:content_type] ||= 'application/json'
     end
 
     def process_call(sym, args)
@@ -43,11 +47,11 @@ module Jimson
         'jsonrpc' => JSON_RPC_VERSION,
         'method'  => namespaced_method,
         'params'  => args,
-        'id'      => self.class.make_id
+        'id'      => format_post_id(self.class.make_id)
       })
-      resp = RestClient.post(@url, post_data, @opts)
+      resp = RestClient::Request.execute(@client_opts.merge(:method => :post, :url => @url, :payload => post_data, :headers => @headers))
       if resp.nil? || resp.body.nil? || resp.body.empty?
-        raise Client::Error::InvalidResponse.new
+        raise Client::Error::InvalidResponse.new(resp)
       end
 
       return resp.body
@@ -55,9 +59,9 @@ module Jimson
 
     def send_batch_request(batch)
       post_data = MultiJson.encode(batch)
-      resp = RestClient.post(@url, post_data, @opts)
+      resp = RestClient::Request.execute(@client_opts.merge(:method => :post, :url => @url, :payload => post_data, :headers => @headers))
       if resp.nil? || resp.body.nil? || resp.body.empty?
-        raise Client::Error::InvalidResponse.new
+        raise Client::Error::InvalidResponse.new(resp)
       end
 
       return resp.body
@@ -72,7 +76,7 @@ module Jimson
     end
 
     def process_single_response(data)
-      raise Client::Error::InvalidResponse.new if !valid_response?(data)
+      raise Client::Error::InvalidResponse.new(data) if !valid_response?(data)
 
       if !!data['error']
         code = data['error']['code']
@@ -93,17 +97,17 @@ module Jimson
       return false if data.has_key?('error') && data.has_key?('result')
 
       if data.has_key?('error')
-        if !data['error'].is_a?(Hash) || !data['error'].has_key?('code') || !data['error'].has_key?('message') 
+        if !data['error'].is_a?(Hash) || !data['error'].has_key?('code') || !data['error'].has_key?('message')
           return false
         end
 
-        if !data['error']['code'].is_a?(Fixnum) || !data['error']['message'].is_a?(String)
+        if !data['error']['code'].is_a?(Integer) || !data['error']['message'].is_a?(String)
           return false
         end
       end
 
       return true
-      
+
       rescue
         return false
     end
@@ -116,23 +120,31 @@ module Jimson
     end
 
     def send_batch
-      batch = @batch.map(&:first) # get the requests 
+      batch = @batch.map(&:first) # get the requests
       response = send_batch_request(batch)
 
       begin
         responses = MultiJson.decode(response)
       rescue
-        raise Client::Error::InvalidJSON.new(json)
+        raise Client::Error::InvalidJSON.new(response)
       end
 
       process_batch_response(responses)
       @batch = []
     end
 
+    def format_post_id(id)
+      if @opts[:id_type] == :string 
+        id.to_s
+      else
+        id
+      end
+    end
+
   end
 
   class BatchClient < BlankSlate
-    
+
     def initialize(helper)
       @helper = helper
     end
@@ -140,7 +152,7 @@ module Jimson
     def method_missing(sym, *args, &block)
       args = args.first if args.size == 1 && args.first.is_a?(Hash)
       request = Jimson::Request.new(sym.to_s, args)
-      @helper.push_batch_request(request) 
+      @helper.push_batch_request(request)
     end
 
   end
@@ -149,7 +161,7 @@ module Jimson
     reveal :instance_variable_get
     reveal :inspect
     reveal :to_s
-    
+
     def self.batch(client)
       helper = client.instance_variable_get(:@helper)
       batch_client = BatchClient.new(helper)
@@ -157,9 +169,9 @@ module Jimson
       helper.send_batch
     end
 
-    def initialize(url, opts = {}, namespace = nil)
-      @url, @opts, @namespace = url, opts, namespace
-      @helper = ClientHelper.new(url, opts, namespace)
+    def initialize(url, opts = {}, namespace = nil, client_opts = {})
+      @url, @opts, @namespace, @client_opts = url, opts, namespace, client_opts
+      @helper = ClientHelper.new(url, opts, namespace, client_opts)
     end
 
     def method_missing(sym, *args, &block)
