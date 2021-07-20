@@ -65,7 +65,7 @@ module Jimson
              'id'      => 1
             })
             response = MultiJson.encode(BOILERPLATE.merge({'result' => 11}))
-            RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+            RestClient::Request.should_receive(:execute).with(method: :post, url: SPEC_URL, payload: expected, headers: {:content_type => 'application/json'}).and_return(@resp_mock)
             @resp_mock.should_receive(:body).at_least(:once).and_return(response)
             @client[:foo].sum({:first_number => 5, :second_number => 6}).should == 11
           end
