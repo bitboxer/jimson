@@ -150,6 +150,7 @@ module Jimson
     end
 
     def method_missing(sym, *args, &block)
+      args = args.first if args.size == 1 && args.first.is_a?(Hash)
       request = Jimson::Request.new(sym.to_s, args)
       @helper.push_batch_request(request)
     end
@@ -184,6 +185,7 @@ module Jimson
         new_ns = @namespace.nil? ? "#{method}." : "#@namespace#{method}."
         return Client.new(@url, @opts, new_ns)
       end
+      args = args.first if args.size == 1 && args.first.is_a?(Hash)
       @helper.process_call(method, args) 
     end
 

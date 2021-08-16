@@ -56,6 +56,21 @@ module Jimson
           end
         end
 
+        context "when sending named paramaters" do
+          it "sends the the params as a hash" do
+            expected = MultiJson.encode({
+             'jsonrpc' => '2.0',
+             'method'  => 'foo.sum',
+             'params'  => { :first_number => 5, :second_number => 6 },
+             'id'      => 1
+            })
+            response = MultiJson.encode(BOILERPLATE.merge({'result' => 11}))
+            RestClient::Request.should_receive(:execute).with(method: :post, url: SPEC_URL, payload: expected, headers: {:content_type => 'application/json'}).and_return(@resp_mock)
+            @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+            @client[:foo].sum({:first_number => 5, :second_number => 6}).should == 11
+          end
+        end
+
         it "sends the id as string" do
           expected = MultiJson.encode({
            'jsonrpc' => '2.0',
@@ -160,7 +175,7 @@ module Jimson
           client.foo([1,2],3).should == 42
         end
       end
-      
+
       context "when one of the parameters is a hash" do
         it "sends a correct JSON-RPC request (array is preserved with hash) and returns the results" do
           expected = MultiJson.encode({
@@ -176,14 +191,14 @@ module Jimson
           client.foo(1, {'bar' => 'baz'}, 3).should == 42
         end
       end
-      
+
       context "when using named parameters" do
         it "sends a correct JSON-RPC request (named parameters are preserved) and returns the result" do
           expected = MultiJson.encode({
             'jsonrpc' => '2.0',
             'method'  => 'foo',
             'params'  => {'bar' => 'baz'},
-            'id'      => 1 
+            'id'      => 1
           })
           response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
           RestClient::Request.should_receive(:execute).with(method: :post, url: SPEC_URL, payload: expected, headers: {:content_type => 'application/json'}).and_return(@resp_mock)
@@ -199,7 +214,7 @@ module Jimson
         batch = MultiJson.encode([
           {"jsonrpc" => "2.0", "method" => "sum", "params" => [1,2,4], "id" => "1"},
           {"jsonrpc" => "2.0", "method" => "subtract", "params" => [42,23], "id" => "2"},
-          {"jsonrpc" => "2.0", "method" => "foo_get", "params" => [{"name" => "myself"}], "id" => "5"},
+          {"jsonrpc" => "2.0", "method" => "foo_get", "params" => {"name" => "myself"}, "id" => "5"},
           {"jsonrpc" => "2.0", "method" => "get_data", "id" => "9"}
         ])
 
