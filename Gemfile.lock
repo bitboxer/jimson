@@ -26,7 +26,7 @@ GEM
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
     rake (13.0.3)
-    rdoc (4.3.0)
+    rdoc (6.3.2)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
       http-cookie (>= 1.0.2, < 2.0)
@@ -42,6 +42,7 @@ GEM
     rspec-mocks (2.99.4)
     unf (0.1.4)
       unf_ext
+    unf (0.1.4-java)
     unf_ext (0.0.7.7)
 
 PLATFORMS
@@ -52,7 +53,7 @@ DEPENDENCIES
   jimson!
   rack-test
   rake
-  rdoc (~> 4.2, >= 4.2.2)
+  rdoc (~> 6.3, >= 4.2.2)
   rspec (~> 2.14, >= 2.14.1)
 
 BUNDLED WITH
