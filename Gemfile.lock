@@ -22,7 +22,7 @@ GEM
     mime-types-data (3.2021.0225)
     multi_json (1.15.0)
     netrc (0.11.0)
-    rack (2.2.13)
+    rack (2.2.14)
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
     rake (13.0.3)
